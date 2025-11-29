@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "guest-selfie-1",
+      "description": "A smiling man's selfie.",
+      "imageUrl": "https://images.unsplash.com/photo-1614750344860-bb819c28ff32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwc2VsZmllfGVufDB8fHx8MTc2NDMyOTgyOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man selfie"
+    },
+    {
+      "id": "guest-selfie-2",
+      "description": "A smiling woman's selfie.",
+      "imageUrl": "https://images.unsplash.com/photo-1546961342-ea5f71b193f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHNlbGZpZXxlbnwwfHx8fDE3NjQzNTQzMjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman selfie"
+    },
+    {
+      "id": "resident-avatar",
+      "description": "Avatar for a resident.",
+      "imageUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjQzNjgzMjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "guard-avatar",
+      "description": "Avatar for a guard.",
+      "imageUrl": "https://images.unsplash.com/photo-1587647069256-6ec77c96c2a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c2VjdXJpdHklMjBndWFyZHxlbnwwfHx8fDE3NjQ0MTQ3ODd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "security guard"
+    },
+    {
+      "id": "hero-image",
+      "description": "A modern luxury estate.",
+      "imageUrl": "https://images.unsplash.com/photo-1574848296471-28f79a036f79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzY0MzIxMjMyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern architecture"
+    }
+  ]
 }
