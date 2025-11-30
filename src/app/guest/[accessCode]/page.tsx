@@ -1,17 +1,10 @@
-import { SelfieCapture } from "./components/selfie-capture";
-import { Logo } from "@/components/app/logo";
+import SelfieCapture from "./components/selfie-capture";
 
-export default function GuestSelfiePage({ params }: { params: { accessCode: string } }) {
-  // We can fetch guest data using the access code here
-  const guestName = "Alice Johnson"; // Placeholder
-
+export default function GuestPage({ params }: { params: { accessCode: string } }) {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center p-4 text-center space-y-8 bg-background">
-      <Logo />
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Welcome, {guestName}</h1>
-        <p className="text-muted-foreground">Please take a quick selfie for verification.</p>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <h1 className="text-xl font-bold mb-4">Eden IT Entry</h1>
+      <p className="mb-4">Welcome! Please take a quick selfie.</p>
       <SelfieCapture accessCode={params.accessCode} />
     </div>
   );
