@@ -1,6 +1,6 @@
 'use client';
 import { motion } from "framer-motion";
-import { Smartphone, Camera, Gate } from "lucide-react";
+import { Smartphone, Camera, DoorOpen } from "lucide-react";
 
 const steps = [
   {
@@ -14,7 +14,7 @@ const steps = [
     description: "Guest clicks the link, confirms their identity, and takes a quick selfie for verification."
   },
   {
-    icon: <Gate className="w-10 h-10 mb-4 text-yellow-400" />,
+    icon: <DoorOpen className="w-10 h-10 mb-4 text-yellow-400" />,
     title: "3. Seamless Entry",
     description: "Guard verifies the code and matches the selfie. The gate opens. Total time: under 45 seconds."
   }
