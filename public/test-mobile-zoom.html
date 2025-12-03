@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Test Mobile Zoom</title>
+<!-- Same as your current setup -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<style>
+/* Your exact CSS from globals.css */
+input, textarea, select {
+  font-size: 16px !important;
+}
+body {
+  overscroll-behavior-y: none;
+  background: #121212;
+  color: white;
+  padding: 20px;
+  font-family: Inter, sans-serif;
+}
+</style>
+</head>
+<body>
+<h1>Test on Your Phone</h1>
+<p>Tap these inputs on your iPhone/Android:</p>
+
+<input type="text" placeholder="Text input" style="padding:10px; width:100%; margin:10px 0;">
+<br>
+<textarea placeholder="Textarea" style="padding:10px; width:100%; height:100px; margin:10px 0;"></textarea>
+<br>
+<select style="padding:10px; width:100%; margin:10px 0;">
+  <option>Select option</option>
+  <option>Option 1</option>
+</select>
+
+<h2>Does it zoom?</h2>
+<p>✅ If NO zoom: CSS fix is working!</p>
+<p>❌ If YES zoom: Need to fix viewport</p>
+</body>
+</html>

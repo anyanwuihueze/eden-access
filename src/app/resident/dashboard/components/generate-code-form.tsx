@@ -1,71 +1,90 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
-import { Clipboard, ClipboardCheck, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Copy } from 'lucide-react';
 import { generateGuestAccessCode } from '@/ai/flows/generate-guest-access-code';
-import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
-  guestName: z.string().min(2, { message: 'Guest name must be at least 2 characters.' }),
-  guestPhoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, { message: 'Please enter a valid phone number.' }),
+  guestName: z.string().min(2, 'Name must be at least 2 characters'),
+  guestPhoneNumber: z.string().min(10, 'Phone number must be at least 10 digits'),
+  residentName: z.string().min(2, 'Your name is required'),
+  residentPhone: z.string().min(10, 'Your phone number is required'),
 });
 
-export function GenerateCodeForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState<{ accessCode: string; accessLink: string } | null>(null);
-  const [copied, setCopied] = useState(false);
-  const { toast } = useToast();
+type FormValues = z.infer<typeof formSchema>;
 
-  const form = useForm<z.infer<typeof formSchema>>({
+export function GenerateCodeForm() {
+  const [generatedCode, setGeneratedCode] = useState<{ accessCode: string; accessLink: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       guestName: '',
       guestPhoneNumber: '',
+      residentName: '',
+      residentPhone: '',
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    setGeneratedCode(null);
+  async function onSubmit(values: FormValues) {
+    setLoading(true);
     try {
-      const result = await generateGuestAccessCode(values);
-      setGeneratedCode(result);
-      form.reset();
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Error Generating Code",
-        description: "There was a problem generating the access code. Please try again.",
+      const result = await generateGuestAccessCode({
+        guestName: values.guestName,
+        guestPhoneNumber: values.guestPhoneNumber,
       });
+
+      // Save to database
+      await fetch('/api/guest-visits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accessCode: result.accessCode,
+          guestName: values.guestName,
+          guestPhone: values.guestPhoneNumber,
+          residentName: values.residentName,
+          residentPhone: values.residentPhone,
+        }),
+      });
+
+      // TODO: Trigger Voice Agent Call #1 to guest
+      // await fetch('/api/voice-agent/welcome-guest', {
+      //   method: 'POST',
+      //   body: JSON.stringify({
+      //     guestPhone: values.guestPhoneNumber,
+      //     guestName: values.guestName,
+      //     accessLink: result.accessLink,
+      //   }),
+      // });
+
+      setGeneratedCode(result);
+    } catch (error) {
+      console.error('Error generating code:', error);
+      alert('Failed to generate access code');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }
 
-  const handleCopy = () => {
+  const copyToClipboard = () => {
     if (generatedCode) {
       navigator.clipboard.writeText(`Your access link for Eden Estate: ${generatedCode.accessLink}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      toast({
-        title: "Copied to clipboard",
-        description: "The access link and message has been copied.",
-      })
+      alert('Link copied to clipboard!');
     }
   };
 
   return (
-    <>
+    <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="guestName"
@@ -73,12 +92,13 @@ export function GenerateCodeForm() {
               <FormItem>
                 <FormLabel>Guest Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. John Doe" {...field} />
+                  <Input placeholder="John Doe" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="guestPhoneNumber"
@@ -86,34 +106,70 @@ export function GenerateCodeForm() {
               <FormItem>
                 <FormLabel>Guest Phone Number</FormLabel>
                 <FormControl>
-                  <Input placeholder="+2348012345678" {...field} />
+                  <Input placeholder="+234..." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Generate Code
+
+          <FormField
+            control={form.control}
+            name="residentName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Your Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Your full name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="residentPhone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Your Phone Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="+234..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? 'Generating...' : 'Generate Access Code'}
           </Button>
         </form>
       </Form>
+
       {generatedCode && (
-        <Card className="mt-6 bg-secondary">
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Access Code</p>
-            <p className="text-2xl font-bold tracking-widest">{generatedCode.accessCode}</p>
-            <p className="text-sm text-muted-foreground mt-2">Access Link</p>
-            <div className="flex items-center gap-2">
-              <Input value={generatedCode.accessLink} readOnly className="text-sm" />
-              <Button variant="ghost" size="icon" onClick={handleCopy}>
-                {copied ? <ClipboardCheck className="h-4 w-4" /> : <Clipboard className="h-4 w-4" />}
-              </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle>Access Code Generated!</CardTitle>
+            <CardDescription>Share this code and link with your guest</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground mb-2">Access Code</p>
+              <p className="text-2xl font-bold tracking-widest">{generatedCode.accessCode}</p>
             </div>
-             <p className="text-xs text-muted-foreground mt-2">A message with the access link has been prepared for you to share via SMS or WhatsApp.</p>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Access Link</p>
+              <div className="flex gap-2">
+                <Input value={generatedCode.accessLink} readOnly className="text-sm" />
+                <Button size="icon" variant="outline" onClick={copyToClipboard}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
-    </>
+    </div>
   );
 }

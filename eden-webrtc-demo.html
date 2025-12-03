@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eden Estate Concierge</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #f0fdf4; /* soft green background */
+      color: #065f46;
+    }
+    .container {
+      text-align: center;
+      max-width: 90%;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #047857;
+    }
+    #status {
+      margin: 1.5rem 0;
+      font-weight: 500;
+      min-height: 1.5rem;
+      color: #065f46;
+    }
+    button {
+      background: #047857;
+      color: white;
+      border: none;
+      padding: 0.85rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(4, 120, 87, 0.2);
+    }
+    button:hover {
+      background: #065f46;
+    }
+    button:disabled {
+      background: #a7f3d0;
+      cursor: not-allowed;
+      color: #065f46;
+    }
+    .logo {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🌴</div>
+    <h1>Eden Estate AI Concierge</h1>
+    <p>Press the button below and speak to our security agent.</p>
+    <div id="status">Ready to connect</div>
+    <button id="startBtn">Speak to Concierge</button>
+  </div>
+
+  <script type="module">
+    // 🔑 REPLACE THIS WITH YOUR ACTUAL VAPI PUBLIC KEY
+    const VAPI_PUBLIC_KEY = '6e884905-618d-45b1-9bb3-8aeb9356b0cf';
+    const VAPI_ASSISTANT_ID = '6e884905-618d-45b1-9bb3-8aeb9356b0cf';
+
+    let vapi;
+
+    async function initVapi() {
+      try {
+        const { Vapi } = await import('https://unpkg.com/@vapi-ai/web@latest/dist/vapi.esm.js');
+        vapi = new Vapi(VAPI_PUBLIC_KEY);
+        await vapi.init();
+        document.getElementById('status').textContent = 'Ready';
+        return true;
+      } catch (e) {
+        console.error('Vapi init failed:', e);
+        document.getElementById('status').textContent = 'Failed to load voice agent';
+        return false;
+      }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('startBtn');
+      const status = document.getElementById('status');
+
+      if (!vapi) {
+        status.textContent = 'Initializing...';
+        const success = await initVapi();
+        if (!success) return;
+      }
+
+      status.textContent = 'Connecting... Allow microphone access.';
+      btn.disabled = true;
+
+      try {
+        await vapi.start(VAPI_ASSISTANT_ID);
+        status.textContent = '🗣️ Connected! Speak naturally (e.g., "Hi, I’m here to see Mr. Adebayo")';
+      } catch (e) {
+        console.error('Call error:', e);
+        status.textContent = 'Microphone blocked or call failed. Refresh and try again.';
+        btn.disabled = false;
+      }
+    });
+
+    // Auto-stop on close
+    window.addEventListener('beforeunload', () => {
+      if (vapi) vapi.stop();
+    });
+  </script>
+</body>
+</html>

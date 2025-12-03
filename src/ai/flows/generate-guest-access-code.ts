@@ -1,5 +1,4 @@
 'use server';
-
 /**
  * @fileOverview Generates a unique access code for a guest.
  *
@@ -7,7 +6,6 @@
  * - GenerateGuestAccessCodeInput - The input type for the generateGuestAccessCode function.
  * - GenerateGuestAccessCodeOutput - The return type for the generateGuestAccessCode function.
  */
-
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
@@ -15,24 +13,33 @@ const GenerateGuestAccessCodeInputSchema = z.object({
   guestName: z.string().describe('The name of the guest.'),
   guestPhoneNumber: z.string().describe('The phone number of the guest.'),
 });
-export type GenerateGuestAccessCodeInput = z.infer<
-  typeof GenerateGuestAccessCodeInputSchema
->;
+
+export type GenerateGuestAccessCodeInput = z.infer<typeof GenerateGuestAccessCodeInputSchema>;
 
 const GenerateGuestAccessCodeOutputSchema = z.object({
   accessCode: z.string().describe('The unique access code for the guest.'),
   accessLink: z.string().describe('The link for the guest to access the property.'),
 });
-export type GenerateGuestAccessCodeOutput = z.infer<
-  typeof GenerateGuestAccessCodeOutputSchema
->;
+
+export type GenerateGuestAccessCodeOutput = z.infer<typeof GenerateGuestAccessCodeOutputSchema>;
 
 export async function generateGuestAccessCode(
   input: GenerateGuestAccessCodeInput
 ): Promise<GenerateGuestAccessCodeOutput> {
-  return generateGuestAccessCodeFlow(input);
+  // Generate a random 6-digit code
+  const accessCode = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  // Build the access link with your actual domain
+  const baseUrl = 'https://9000-firebase-studio-1764413759611.cluster-fbfjltn375c6wqxlhoehbz44sk.cloudworkstations.dev';
+  const accessLink = `${baseUrl}/guest/${accessCode}`;
+  
+  return {
+    accessCode,
+    accessLink,
+  };
 }
 
+// Keep these for backwards compatibility but they're no longer used
 const prompt = ai.definePrompt({
   name: 'generateGuestAccessCodePrompt',
   input: {
@@ -42,10 +49,8 @@ const prompt = ai.definePrompt({
     schema: GenerateGuestAccessCodeOutputSchema,
   },
   prompt: `You are a concierge AI that is an expert in generating guest access codes for a luxury estate.
-
   Generate a unique access code and link for the provided guest information. The access code should be a random 6 digit number.
   The access link should include the access code in URL format.
-
   Guest Name: {{{guestName}}}
   Guest Phone Number: {{{guestPhoneNumber}}}`,
 });

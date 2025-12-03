@@ -19,7 +19,7 @@ const formSchema = z.object({
 });
 
 type AuthFormProps = {
-  role: 'Resident' | 'Guard' | 'Admin';
+  role: 'Resident' | 'Guard';
 };
 
 export function AuthForm({ role }: AuthFormProps) {
@@ -39,8 +39,6 @@ export function AuthForm({ role }: AuthFormProps) {
     setIsLoading(true);
     setError('');
     
-    console.log('�� Attempting sign in:', values.email);
-    
     try {
       // Sign in with Firebase
       const userCredential = await signInWithEmailAndPassword(
@@ -49,49 +47,57 @@ export function AuthForm({ role }: AuthFormProps) {
         values.password
       );
       
-      console.log('✅ SUCCESS! Signed in:', userCredential.user.email);
+      console.log('✅ Signed in successfully:', userCredential.user.email);
       
       // Redirect based on role
       if (role === 'Resident') {
         router.push('/resident/dashboard');
-      } else if (role === 'Guard') {
+      } else {
         router.push('/guard/dashboard');
-      } else if (role === 'Admin') {
-        router.push('/admin/dashboard');
       }
       
     } catch (err: any) {
-      console.error('❌ Sign in FAILED:', err.code, err.message);
+      console.error('❌ Sign in error:', err);
       
-      // User-friendly error messages
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
-        setError('Incorrect email or password. Check your credentials and try again.');
-      } else if (err.code === 'auth/user-not-found') {
-        setError('No account found with this email.');
-      } else if (err.code === 'auth/invalid-email') {
-        setError('Invalid email address.');
-      } else if (err.code === 'auth/too-many-requests') {
-        setError('Too many failed attempts. Please wait a few minutes and try again.');
-      } else {
-        setError(`Sign in failed: ${err.message}`);
+      // Handle Firebase auth errors
+      switch (err.code) {
+        case 'auth/invalid-email':
+          setError('Invalid email address');
+          break;
+        case 'auth/user-disabled':
+          setError('This account has been disabled');
+          break;
+        case 'auth/user-not-found':
+          setError('No account found with this email');
+          break;
+        case 'auth/wrong-password':
+          setError('Incorrect password');
+          break;
+        case 'auth/too-many-requests':
+          setError('Too many failed attempts. Try again later.');
+          break;
+        default:
+          setError('Sign in failed. Please try again.');
       }
     } finally {
       setIsLoading(false);
     }
   }
 
-  // Demo credentials - MUST match Firebase exactly
+  // Demo credentials based on role
   const demoCredentials = {
-    Resident: { email: 'resident@test.com', password: 'resident123' },
-    Guard: { email: 'guard@edenestate.com', password: 'guard123' },
-    Admin: { email: 'admin@edenestate.com', password: 'admin123' }
+    Resident: { email: 'resident@edenestate.com', password: 'resident123' },
+    Guard: { email: 'guard@edenestate.com', password: 'guard123' }
   };
 
   const handleDemoLogin = () => {
     const demo = demoCredentials[role];
     form.setValue('email', demo.email);
     form.setValue('password', demo.password);
-    setTimeout(() => form.handleSubmit(onSubmit)(), 100);
+    // Trigger form submission after a short delay
+    setTimeout(() => {
+      form.handleSubmit(onSubmit)();
+    }, 100);
   };
 
   return (
@@ -104,8 +110,8 @@ export function AuthForm({ role }: AuthFormProps) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600 text-center font-medium">{error}</p>
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+                <p className="text-sm text-destructive text-center">{error}</p>
               </div>
             )}
             
@@ -120,7 +126,6 @@ export function AuthForm({ role }: AuthFormProps) {
                       placeholder="name@example.com" 
                       {...field} 
                       disabled={isLoading}
-                      autoComplete="email"
                     />
                   </FormControl>
                   <FormMessage />
@@ -139,7 +144,6 @@ export function AuthForm({ role }: AuthFormProps) {
                       placeholder="••••••••" 
                       {...field} 
                       disabled={isLoading}
-                      autoComplete="current-password"
                     />
                   </FormControl>
                   <FormMessage />
@@ -148,29 +152,30 @@ export function AuthForm({ role }: AuthFormProps) {
             />
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90" 
               disabled={isLoading}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
 
-            <div className="pt-4 border-t space-y-3">
+            {/* Demo credentials section */}
+            <div className="pt-4 border-t border-border space-y-3">
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-2">
-                  Demo credentials:
+                  Demo credentials for {role}:
                 </p>
-                <div className="text-sm bg-secondary/50 p-3 rounded-lg space-y-1">
-                  <p><strong>Email:</strong> <code className="bg-black/5 px-1 py-0.5 rounded">{demoCredentials[role].email}</code></p>
-                  <p><strong>Password:</strong> <code className="bg-black/5 px-1 py-0.5 rounded">{demoCredentials[role].password}</code></p>
+                <div className="text-sm bg-secondary/50 p-2 rounded-lg">
+                  <p>Email: <span className="font-mono">{demoCredentials[role].email}</span></p>
+                  <p>Password: <span className="font-mono">{demoCredentials[role].password}</span></p>
                 </div>
               </div>
               
               <Button
                 type="button"
                 onClick={handleDemoLogin}
-                variant="outline"
-                className="w-full"
+                variant="secondary"
+                className="w-full border-border"
                 size="sm"
                 disabled={isLoading}
               >
