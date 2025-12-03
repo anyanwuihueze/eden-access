@@ -1,3 +1,4 @@
+
 'use client';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import Link from 'next/link';
 
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black pt-20">
       {/* Animated Background Grid */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:64px_64px]"></div>
@@ -24,7 +25,7 @@ export default function Hero() {
         >
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600">
-              AI-Powered Security
+              AI-Powered Access
             </span>
             <br />
             <span className="text-white">

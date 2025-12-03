@@ -1,8 +1,8 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import PWAInstaller from "@/components/PWAInstaller";
-import AdminAuth from "@/components/AdminAuth";
 
 export const metadata: Metadata = {
   title: 'Eden Access',
@@ -38,7 +38,6 @@ export default function RootLayout({
         {children}
         <Toaster />
         <PWAInstaller />
-        <AdminAuth />
       </body>
     </html>
   );

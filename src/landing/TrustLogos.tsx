@@ -1,12 +1,13 @@
+
 'use client';
 import { motion } from 'framer-motion';
 
 const logos = [
-  { name: 'Chevy View Estate', path: '/logo-placeholder.svg' },
-  { name: 'Banana Island', path: '/logo-placeholder.svg' },
-  { name: 'Eko Atlantic', path: '/logo-placeholder.svg' },
-  { name: 'Pinnock Beach Estate', path: '/logo-placeholder.svg' },
-  { name: 'Amen Estate', path: '/logo-placeholder.svg' },
+  "The Azure Enclave",
+  "Orchid Bay Residences",
+  "Serenity Point",
+  "Crimson Crest Manor",
+  "Opal Gardens",
 ];
 
 export default function TrustLogos() {
@@ -18,13 +19,18 @@ export default function TrustLogos() {
         viewport={{ once: true }}
         transition={{ duration: 1 }}
       >
-        <h3 className="text-lg text-gray-400 mb-8 tracking-widest">
-          TRUSTED BY THE NATION'S PREMIER ESTATES
+        <h3 className="text-sm text-gray-400/80 mb-8 tracking-widest uppercase">
+          Trusted by the Nation's Premier Estates
         </h3>
-        <div className="flex justify-center items-center gap-12 md:gap-16 flex-wrap px-4">
-          {logos.map((logo) => (
-            <div key={logo.name} className="grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all">
-              <span className="text-gray-400 font-semibold">{logo.name}</span>
+        <div className="max-w-4xl mx-auto flex justify-center items-center gap-x-8 md:gap-x-12 flex-wrap px-4">
+          {logos.map((logo, index) => (
+            <div key={logo} className="flex items-center gap-x-8 md:gap-x-12">
+              <span className="text-gray-400 font-medium whitespace-nowrap text-lg">
+                {logo}
+              </span>
+              {index < logos.length - 1 && (
+                <span className="text-yellow-400/50 font-bold text-2xl hidden sm:inline-block">•</span>
+              )}
             </div>
           ))}
         </div>

@@ -1,6 +1,7 @@
+
 'use client';
 import { motion } from "framer-motion";
-import { Mic, Smartphone, Camera, DoorOpen, Smile } from "lucide-react";
+import { Smartphone, Camera, DoorOpen } from "lucide-react";
 
 const steps = [
   {

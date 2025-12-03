@@ -1,3 +1,4 @@
+
 'use client';
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -40,41 +41,43 @@ const features = [
 export default function FeaturesCarousel() {
   return (
     <section className="py-24 bg-background overflow-hidden">
-      <h2 className="text-4xl font-extrabold text-center mb-12 text-white">
-        A Five-Star Experience for Everyone
-      </h2>
-      <Carousel 
-        opts={{ loop: true, align: "start" }}
-        plugins={[Autoplay({ delay: 4000, stopOnInteraction: true })]}
-        className="w-full max-w-7xl mx-auto"
-      >
-        <CarouselContent className="-ml-8">
-          {features.map((feature, index) => (
-            <CarouselItem key={index} className="pl-8 md:basis-1/2">
-              <div className="p-1">
-                <Card className="overflow-hidden border-border bg-card rounded-2xl shadow-lg">
-                  <CardContent className="flex flex-col p-0">
-                    <Image 
-                      src={feature.image}
-                      alt={feature.description}
-                      width={1280}
-                      height={720}
-                      className="object-cover aspect-video transition-transform duration-500 hover:scale-105"
-                      data-ai-hint={feature.hint}
-                    />
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-white">{feature.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-2">{feature.description}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="left-4 hidden sm:flex" />
-        <CarouselNext className="right-4 hidden sm:flex" />
-      </Carousel>
+      <div className="container mx-auto">
+        <h2 className="text-4xl font-extrabold text-center mb-12 text-white">
+          A Five-Star Experience for Everyone
+        </h2>
+        <Carousel 
+          opts={{ loop: true, align: "start" }}
+          plugins={[Autoplay({ delay: 4000, stopOnInteraction: true })]}
+          className="w-full max-w-5xl mx-auto"
+        >
+          <CarouselContent className="-ml-4">
+            {features.map((feature, index) => (
+              <CarouselItem key={index} className="pl-4 md:basis-1/2">
+                <div className="p-1">
+                  <Card className="overflow-hidden border-border bg-card rounded-2xl shadow-lg transition-all duration-300 hover:shadow-yellow-400/20 hover:border-yellow-400/50">
+                    <CardContent className="flex flex-col p-0">
+                      <Image 
+                        src={feature.image}
+                        alt={feature.description}
+                        width={1280}
+                        height={720}
+                        className="object-cover aspect-video transition-transform duration-500 group-hover:scale-105"
+                        data-ai-hint={feature.hint}
+                      />
+                      <div className="p-6 bg-card/50 backdrop-blur-sm">
+                        <h3 className="text-xl font-bold text-white">{feature.title}</h3>
+                        <p className="text-sm text-muted-foreground mt-2">{feature.description}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="left-[-50px] hidden sm:flex" />
+          <CarouselNext className="right-[-50px] hidden sm:flex" />
+        </Carousel>
+      </div>
     </section>
   );
 }
