@@ -3,12 +3,35 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function Hero() {
+  const heroImage = PlaceHolderImages.find(p => p.id === 'hero-image');
+
   return (
-    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900 pt-20">
+    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-black pt-20">
+      {/* Background Image with Ken Burns effect */}
+      {heroImage && (
+        <motion.div
+          className="absolute inset-0 z-0"
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.25, transition: { duration: 2, ease: 'easeOut' } }}
+        >
+          <Image
+            src={heroImage.imageUrl}
+            alt={heroImage.description}
+            fill
+            data-ai-hint={heroImage.imageHint}
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent"></div>
+        </motion.div>
+      )}
+      
       {/* Animated Background Grid */}
-      <div className="absolute inset-0 opacity-20">
+      <div className="absolute inset-0 z-10 opacity-10">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:64px_64px]"></div>
       </div>
 
@@ -25,7 +48,7 @@ export default function Hero() {
           repeatType: 'reverse',
           ease: 'easeInOut',
         }}
-        className="absolute top-20 left-20 w-72 h-72 bg-yellow-400 rounded-full mix-blend-screen filter blur-3xl opacity-10"
+        className="absolute top-20 left-20 w-72 h-72 bg-yellow-400 rounded-full mix-blend-screen filter blur-3xl opacity-5 z-20"
       ></motion.div>
       <motion.div
         animate={{
@@ -39,11 +62,11 @@ export default function Hero() {
           repeatType: 'reverse',
           ease: 'easeInOut',
         }}
-        className="absolute bottom-20 right-20 w-96 h-96 bg-yellow-500 rounded-full mix-blend-screen filter blur-3xl opacity-5"
+        className="absolute bottom-20 right-20 w-96 h-96 bg-yellow-500 rounded-full mix-blend-screen filter blur-3xl opacity-5 z-20"
       ></motion.div>
 
       {/* Hero Content */}
-      <div className="relative z-10 text-center px-4 max-w-4xl">
+      <div className="relative z-30 text-center px-4 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -91,7 +114,6 @@ export default function Hero() {
             <Link href="#how-it-works">See How It Works</Link>
           </Button>
         </motion.div>
-
       </div>
     </section>
   );
