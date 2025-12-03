@@ -2,28 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogIn, Shield, User } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function AdminAuth() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [userEmail, setUserEmail] = useState('');
 
   // Listen to auth state changes
@@ -40,189 +26,36 @@ export default function AdminAuth() {
 
     return () => unsubscribe();
   }, []);
-
-  const DEMO_CREDENTIALS = {
-    email: 'admin@edenaccess.com',
-    password: 'demo123'
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      
-      console.log('✅ Admin logged in successfully');
-      setIsAuthenticated(true);
-      setShowLogin(false);
-      
+  
+  const handleLoginClick = () => {
+    if (isAuthenticated) {
+      // If user is already logged in, maybe take them to a default dashboard
+      // For now, let's assume they might be an admin.
+      // A better approach would be to check their role here.
       router.push('/admin');
-      
-    } catch (err: any) {
-      console.error('Login error:', err);
-      
-      switch (err.code) {
-        case 'auth/invalid-email':
-          setError('Invalid email address');
-          break;
-        case 'auth/user-disabled':
-          setError('This account has been disabled');
-          break;
-        case 'auth/user-not-found':
-        case 'auth/wrong-password':
-          setError('Invalid email or password');
-          break;
-        default:
-          setError('Login failed. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+    } else {
+      // If not logged in, go to the universal login page
+      router.push('/login');
     }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setIsAuthenticated(false);
-      console.log('✅ Admin logged out');
-      router.push('/');
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
-  };
-
-  const handleQuickDemo = () => {
-    setEmail(DEMO_CREDENTIALS.email);
-    setPassword(DEMO_CREDENTIALS.password);
   };
 
   return (
     <div className="fixed top-4 right-4 z-50">
-      {/* Admin Button */}
       <Button
-        onClick={() => {
-          if (isAuthenticated) {
-            window.location.href = '/admin';
-          } else {
-            setShowLogin(true);
-          }
-        }}
+        onClick={handleLoginClick}
         className="gap-2 shadow-lg hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-r from-primary to-[#E6B800] text-primary-foreground hover:from-primary/90 hover:to-[#E6B800]/90"
         size="sm"
       >
+        <LogIn className="w-4 h-4" />
         {isAuthenticated ? (
           <>
-            <Shield className="w-4 h-4" />
             <span className="hidden sm:inline">Command Center</span>
             <span className="sm:hidden">Admin</span>
           </>
         ) : (
-          <>
-            <LogIn className="w-4 h-4" />
-            <span className="hidden sm:inline">Admin Login</span>
-            <span className="sm:hidden">Admin</span>
-          </>
+          <span className="hidden sm:inline">Login</span>
         )}
       </Button>
-
-      {/* Login Dialog - Only show if not authenticated */}
-      {showLogin && (
-        <Dialog open={true} onOpenChange={setShowLogin}>
-          <DialogContent className="sm:max-w-md border-border bg-card text-card-foreground">
-            <DialogHeader>
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center mb-4">
-                <Shield className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <DialogTitle className="text-center text-2xl">
-                Admin Access
-              </DialogTitle>
-              <DialogDescription className="text-center text-muted-foreground">
-                AI-Powered Property Intelligence
-              </DialogDescription>
-            </DialogHeader>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              {error && (
-                <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
-                  <p className="text-sm text-destructive">{error}</p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@edenaccess.com"
-                  required
-                  className="bg-background border-border"
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="bg-background border-border"
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowLogin(false)}
-                  className="flex-1 border-border text-foreground hover:bg-secondary"
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-primary to-accent text-primary-foreground hover:from-primary/90 hover:to-accent/90"
-                >
-                  {loading ? 'Signing in...' : 'Enter Command Center'}
-                </Button>
-              </div>
-
-              <div className="pt-4 border-t border-border space-y-3">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Admin demo credentials:
-                  </p>
-                  <div className="text-sm bg-secondary/50 p-2 rounded-lg">
-                    <p>Email: <span className="font-mono">{DEMO_CREDENTIALS.email}</span></p>
-                    <p>Password: <span className="font-mono">{DEMO_CREDENTIALS.password}</span></p>
-                  </div>
-                </div>
-                
-                <Button
-                  type="button"
-                  onClick={handleQuickDemo}
-                  variant="secondary"
-                  className="w-full border-border"
-                  size="sm"
-                  disabled={loading}
-                >
-                  Pre-fill Demo Credentials
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 }

@@ -39,32 +39,32 @@ const features = [
 
 export default function FeaturesCarousel() {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-24 bg-background overflow-hidden">
       <h2 className="text-4xl font-extrabold text-center mb-12 text-white">
         A Five-Star Experience for Everyone
       </h2>
       <Carousel 
         opts={{ loop: true, align: "start" }}
-        plugins={[Autoplay({ delay: 5000, stopOnInteraction: true })]}
-        className="w-full max-w-6xl mx-auto px-4"
+        plugins={[Autoplay({ delay: 4000, stopOnInteraction: true })]}
+        className="w-full max-w-7xl mx-auto"
       >
-        <CarouselContent className="-ml-4">
+        <CarouselContent className="-ml-8">
           {features.map((feature, index) => (
-            <CarouselItem key={index} className="pl-4 md:basis-1/2 lg:basis-1/3">
+            <CarouselItem key={index} className="pl-8 md:basis-1/2">
               <div className="p-1">
-                <Card className="overflow-hidden border-border bg-card">
-                  <CardContent className="flex flex-col aspect-square items-start justify-end p-6 relative">
+                <Card className="overflow-hidden border-border bg-card rounded-2xl shadow-lg">
+                  <CardContent className="flex flex-col p-0">
                     <Image 
                       src={feature.image}
                       alt={feature.description}
-                      fill
-                      className="object-cover transition-transform duration-500 hover:scale-105"
+                      width={1280}
+                      height={720}
+                      className="object-cover aspect-video transition-transform duration-500 hover:scale-105"
                       data-ai-hint={feature.hint}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                    <div className="relative z-10 text-white">
-                      <h3 className="text-2xl font-bold">{feature.title}</h3>
-                      <p className="text-sm text-gray-300">{feature.description}</p>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-white">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-2">{feature.description}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -72,8 +72,8 @@ export default function FeaturesCarousel() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden sm:flex" />
-        <CarouselNext className="hidden sm:flex" />
+        <CarouselPrevious className="left-4 hidden sm:flex" />
+        <CarouselNext className="right-4 hidden sm:flex" />
       </Carousel>
     </section>
   );
