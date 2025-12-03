@@ -1,3 +1,4 @@
+
 'use client';
 import { motion } from "framer-motion";
 import { ShieldCheck, User, Video } from "lucide-react";
@@ -22,12 +23,12 @@ const features = [
 
 export default function FeatureGrid() {
   return (
-    <section className="py-20 max-w-6xl mx-auto px-4">
+    <section className="py-24 max-w-6xl mx-auto px-4">
       <div className="grid md:grid-cols-3 gap-8 text-white">
         {features.map((feature, index) => (
           <motion.div 
             key={index} 
-            className="p-8 bg-card rounded-2xl shadow-lg border border-border"
+            className="p-8 bg-card rounded-2xl shadow-lg border border-border transition-all duration-300 hover:shadow-yellow-400/20 hover:border-yellow-400/50"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

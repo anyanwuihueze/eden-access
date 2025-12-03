@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import Autoplay from "embla-carousel-autoplay";
+import { motion } from "framer-motion";
 
 const features = [
   {
@@ -41,42 +42,59 @@ const features = [
 export default function FeaturesCarousel() {
   return (
     <section className="py-24 bg-background overflow-hidden">
-      <div className="container mx-auto">
-        <h2 className="text-4xl font-extrabold text-center mb-12 text-white">
-          A Five-Star Experience for Everyone
-        </h2>
-        <Carousel 
-          opts={{ loop: true, align: "start" }}
-          plugins={[Autoplay({ delay: 4000, stopOnInteraction: true })]}
-          className="w-full max-w-5xl mx-auto"
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
         >
-          <CarouselContent className="-ml-4">
-            {features.map((feature, index) => (
-              <CarouselItem key={index} className="pl-4 md:basis-1/2">
-                <div className="p-1">
-                  <Card className="overflow-hidden border-border bg-card rounded-2xl shadow-lg transition-all duration-300 hover:shadow-yellow-400/20 hover:border-yellow-400/50">
-                    <CardContent className="flex flex-col p-0">
-                      <Image 
-                        src={feature.image}
-                        alt={feature.description}
-                        width={1280}
-                        height={720}
-                        className="object-cover aspect-video transition-transform duration-500 group-hover:scale-105"
-                        data-ai-hint={feature.hint}
-                      />
-                      <div className="p-6 bg-card/50 backdrop-blur-sm">
-                        <h3 className="text-xl font-bold text-white">{feature.title}</h3>
-                        <p className="text-sm text-muted-foreground mt-2">{feature.description}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-[-50px] hidden sm:flex" />
-          <CarouselNext className="right-[-50px] hidden sm:flex" />
-        </Carousel>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-12 text-white">
+            A Five-Star Experience for Everyone
+          </h2>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <Carousel 
+            opts={{ loop: true, align: "start" }}
+            plugins={[Autoplay({ delay: 4000, stopOnInteraction: true })]}
+            className="w-full max-w-6xl mx-auto"
+          >
+            <CarouselContent className="-ml-8">
+              {features.map((feature, index) => (
+                <CarouselItem key={index} className="pl-8 md:basis-1/2">
+                  <div className="p-1 h-full">
+                    <Card className="h-full overflow-hidden border-border bg-card rounded-2xl shadow-lg transition-all duration-300 hover:shadow-yellow-400/20 hover:border-yellow-400/50 flex flex-col group">
+                      <CardContent className="flex flex-col p-0">
+                        <div className="overflow-hidden">
+                           <Image 
+                            src={feature.image}
+                            alt={feature.description}
+                            width={1280}
+                            height={720}
+                            className="object-cover aspect-video transition-transform duration-500 group-hover:scale-105"
+                            data-ai-hint={feature.hint}
+                          />
+                        </div>
+                        <div className="p-6 bg-card/50">
+                          <h3 className="text-xl font-bold text-white">{feature.title}</h3>
+                          <p className="text-sm text-muted-foreground mt-2">{feature.description}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-[-50px] hidden lg:flex" />
+            <CarouselNext className="right-[-50px] hidden lg:flex" />
+          </Carousel>
+        </motion.div>
       </div>
     </section>
   );
