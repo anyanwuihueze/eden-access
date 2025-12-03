@@ -22,7 +22,7 @@ export default function TrustLogos() {
         <h3 className="text-sm text-gray-400/80 mb-8 tracking-widest uppercase">
           Trusted by the Nation's Premier Estates
         </h3>
-        <div className="max-w-4xl mx-auto flex justify-center items-center gap-x-8 md:gap-x-12 flex-wrap px-4">
+        <div className="max-w-5xl mx-auto flex justify-center items-center gap-x-8 md:gap-x-12 flex-wrap px-4">
           {logos.map((logo, index) => (
             <div key={logo} className="flex items-center gap-x-8 md:gap-x-12">
               <span className="text-gray-400 font-medium whitespace-nowrap text-lg">

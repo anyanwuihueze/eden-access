@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { cn } from "@/lib/utils";
 
 const features = [
   {
@@ -66,7 +67,7 @@ export default function FeaturesCarousel() {
                 variants={cardVariants}
                 className="h-full"
               >
-                <Card className="h-full overflow-hidden border-border bg-card rounded-2xl shadow-lg transition-all duration-300 group relative flex flex-col">
+                <Card className="group relative h-full overflow-hidden rounded-2xl border-border bg-card shadow-lg transition-all duration-300 flex flex-col hover:shadow-primary/20">
                   <div className="relative w-full aspect-[16/10] overflow-hidden">
                     {featureImage && (
                        <Image 
@@ -77,16 +78,16 @@ export default function FeaturesCarousel() {
                         data-ai-hint={featureImage.imageHint}
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                   </div>
-                  <CardContent className="p-6 bg-card/50 flex-grow flex flex-col justify-end">
-                    <div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-yellow-400 transition-colors duration-300">{feature.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-2">{feature.description}</p>
-                    </div>
+                  
+                  <CardContent className="p-6 bg-card/50">
+                    <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 transition-colors duration-300">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground mt-2">{feature.description}</p>
                   </CardContent>
+
                   {/* Subtle hover glow */}
-                  <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-yellow-400/50 transition-all duration-300"></div>
+                  <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-yellow-400/50 transition-all duration-300 pointer-events-none"></div>
                 </Card>
               </motion.div>
             );
