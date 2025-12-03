@@ -7,17 +7,17 @@ const steps = [
   {
     icon: <Smartphone className="w-10 h-10 mb-4 text-yellow-400" />,
     title: "1. AI-Powered Invitation",
-    description: "Resident generates a pass. Our AI Concierge, Maya, personally calls the guest with a warm welcome and their unique access code."
+    description: "Resident generates a pass. Eve, our AI Concierge, personally calls the guest with a warm welcome and their unique access code."
   },
   {
     icon: <Camera className="w-10 h-10 mb-4 text-yellow-400" />,
     title: "2. Biometric Verification",
-    description: "Guest uses the secure link to take a quick selfie. Maya instantly notifies the resident that their guest is awaiting entry at the gate."
+    description: "Guest uses the secure link to take a quick selfie. Eve instantly notifies the resident that their guest is awaiting entry at the gate."
   },
   {
     icon: <DoorOpen className="w-10 h-10 mb-4 text-yellow-400" />,
-    title: "3. Seamless Entry & Exit",
-    description: "The guard verifies the guest in seconds. Upon departure, Maya places a follow-up call to gather feedback, providing invaluable insights."
+    title: "3. Seamless Entry & Feedback",
+    description: "The guard verifies the guest in seconds. Upon departure, Eve places a follow-up call, providing you with actionable insights to continuously improve your guest experience."
   }
 ];
 
@@ -40,7 +40,7 @@ export default function HowItWorks() {
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        Our process is designed for maximum security and ultimate convenience, powered by our AI Concierge.
+        Our process is designed for maximum security and ultimate convenience, powered by our AI Concierge, Eve.
       </motion.p>
       <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto px-4 relative">
         {/* Dashed lines for desktop */}

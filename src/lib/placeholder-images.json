@@ -47,6 +47,24 @@
       "description": "A guest taking a selfie on their phone for verification.",
       "imageUrl": "https://images.unsplash.com/photo-1713261162282-57dd8043329a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwaG9uZSUyMHNlbGZpZXxlbnwwfHx8fDE3NjQ3Nzc0NzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "phone selfie"
+    },
+    {
+      "id": "card-luxury-estate",
+      "description": "The entrance to a modern, luxurious gated community.",
+      "imageUrl": "https://images.unsplash.com/photo-1588698188724-034a364d2b9a?q=80&w=3870&auto=format&fit=crop",
+      "imageHint": "modern gate night"
+    },
+    {
+      "id": "card-premium-hotel",
+      "description": "The sleek and modern lobby of a premium hotel.",
+      "imageUrl": "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=3774&auto=format&fit=crop",
+      "imageHint": "hotel lobby modern"
+    },
+    {
+      "id": "card-corporate-office",
+      "description": "The exterior of a modern, professional corporate office building.",
+      "imageUrl": "https://images.unsplash.com/photo-1590650213763-d1446f1e85a5?q=80&w=3870&auto=format&fit=crop",
+      "imageHint": "corporate building modern"
     }
   ]
 }
