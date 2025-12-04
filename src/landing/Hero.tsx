@@ -4,41 +4,65 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Lock, Eye, Mic } from 'lucide-react';
 
 export default function Hero() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-image');
 
   return (
     <section className="relative w-full min-h-screen flex flex-col justify-center overflow-hidden bg-black pt-20">
-      {/* Background Image with Ken Burns effect */}
+      {/* Enhanced Background Image with Ken Burns effect */}
       {heroImage && (
         <motion.div
           className="absolute inset-0"
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 0.15 }}
-          transition={{ duration: 15, ease: 'easeOut' }}
+          initial={{ scale: 1.2, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.4 }}
+          transition={{ duration: 8, ease: 'easeOut' }}
         >
           <Image
             src={heroImage.imageUrl}
             alt={heroImage.description}
             fill
             data-ai-hint={heroImage.imageHint}
-            className="object-cover"
+            className="object-cover object-center"
             priority
+            quality={100}
           />
-          <div className="absolute inset-0 bg-black/50"></div>
+          {/* Gradient overlay instead of solid black */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50"></div>
         </motion.div>
       )}
-      
-      {/* Animated Background Grid */}
-      <div className="absolute inset-0 opacity-20">
+
+      {/* Parallax layer for atmospheric depth */}
+      <motion.div
+        className="absolute inset-0 opacity-30"
+        initial={{ y: 0 }}
+        animate={{ y: -20 }}
+        transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
+      >
+        {/* Optional: Add a very faint texture overlay */}
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02]"></div>
+      </motion.div>
+
+      {/* Enhanced Animated Background Grid */}
+      <div className="absolute inset-0 opacity-[0.15]">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:64px_64px]"></div>
       </div>
 
-      {/* Glowing Orbs */}
-      <div className="absolute top-20 left-20 w-72 h-72 bg-yellow-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-1000"></div>
+      {/* Security-themed floating elements */}
+      <div className="absolute top-1/4 left-1/4 opacity-10">
+        <Lock className="w-8 h-8 text-yellow-400" />
+      </div>
+      <div className="absolute top-1/3 right-1/4 opacity-10">
+        <Eye className="w-8 h-8 text-yellow-400" />
+      </div>
+      <div className="absolute bottom-1/3 left-1/3 opacity-10">
+        <Mic className="w-8 h-8 text-yellow-400" />
+      </div>
+
+      {/* Glowing Orbs (reduced opacity) */}
+      <div className="absolute top-20 left-20 w-72 h-72 bg-yellow-400 rounded-full mix-blend-multiply filter blur-3xl opacity-15 animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl opacity-8 animate-pulse delay-1000"></div>
 
       {/* Hero Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex-grow flex flex-col justify-center">
@@ -89,22 +113,80 @@ export default function Hero() {
             <Link href="#how-it-works">See How It Works</Link>
           </Button>
         </motion.div>
+
+        {/* Stats Bar */}
+        <motion.div
+          className="mt-16 grid grid-cols-3 gap-8 max-w-3xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.8 }}
+        >
+          <div className="text-center">
+            <div className="text-4xl font-bold text-yellow-400">45s</div>
+            <div className="text-sm text-gray-400 mt-1">Average Gate Time</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-bold text-yellow-400">73%</div>
+            <div className="text-sm text-gray-400 mt-1">Cost Reduction</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-bold text-yellow-400">98.7%</div>
+            <div className="text-sm text-gray-400 mt-1">Guest Satisfaction</div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* "Meet Eve" Micro-Row */}
+      {/* Enhanced "Meet Eve" Micro-Row */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
         transition={{ delay: 1.2, duration: 1, ease: "easeOut" }}
-        className="relative z-10 w-full px-4 pb-16"
+        className="relative z-10 w-full px-4 pb-16 group"
       >
-        <div className="max-w-3xl mx-auto text-center p-6 bg-black/30 backdrop-blur-sm rounded-2xl border border-white/10">
-            <h3 className="text-xl font-bold text-yellow-400 mb-2">Meet Eve — Your AI Concierge</h3>
-            <p className="text-base text-gray-300 mb-3 max-w-2xl mx-auto">
-              A warm, intelligent voice that welcomes every guest, verifies identities, and gathers feedback to keep your estate running smoothly.
-            </p>
-            <p className="text-xs font-semibold tracking-wider uppercase text-gray-500">Powered by Eden Intelligence.</p>
+        <div className="max-w-3xl mx-auto text-center p-6 bg-black/40 backdrop-blur-lg rounded-2xl border border-yellow-400/20 group-hover:border-yellow-400/40 transition-all duration-300">
+          {/* Add a subtle pulse to "Eve" */}
+          <h3 className="text-xl font-bold text-yellow-400 mb-2 relative inline-block">
+            Meet Eve — Your AI Concierge
+            <span className="absolute -inset-1 bg-yellow-400/10 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+          </h3>
+          
+          {/* Voice waveform indicator */}
+          <div className="flex justify-center gap-1 mb-3 opacity-50 group-hover:opacity-80 transition-opacity">
+            {[1, 2, 3, 4, 3, 2, 1].map((height, i) => (
+              <motion.div
+                key={i}
+                className="w-1 bg-yellow-400 rounded-full"
+                animate={{ height: `${height * 4}px` }}
+                transition={{ repeat: Infinity, duration: 1, delay: i * 0.1 }}
+              />
+            ))}
+          </div>
+          
+          <p className="text-base text-gray-300 mb-3 max-w-2xl mx-auto leading-relaxed">
+            A warm, intelligent voice that welcomes every guest, verifies identities, and gathers feedback to keep your estate running smoothly.
+          </p>
+          
+          {/* Enhanced "Powered by" with glow */}
+          <p className="text-xs font-semibold tracking-wider uppercase text-gray-500 group-hover:text-yellow-300/70 transition-colors">
+            Powered by <span className="text-yellow-300">Eden Intelligence</span>
+          </p>
         </div>
+      </motion.div>
+
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2 }}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+      >
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        >
+          <ArrowDown className="w-6 h-6 text-yellow-400/60" />
+        </motion.div>
       </motion.div>
     </section>
   );
