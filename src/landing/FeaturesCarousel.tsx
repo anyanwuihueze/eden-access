@@ -1,11 +1,8 @@
-
 'use client';
-
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { cn } from "@/lib/utils";
 
 const features = [
   {
@@ -25,71 +22,76 @@ const features = [
   },
 ];
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.15,
-      duration: 0.6,
-      ease: "easeOut"
-    }
-  })
-};
-
 export default function FeaturesCarousel() {
   return (
-    <section className="py-24 bg-background">
-      <div className="container mx-auto px-4">
+    <section className="py-24 bg-gradient-to-b from-neutral-50 via-white to-neutral-50 relative overflow-hidden">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.03),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(74,222,128,0.03),transparent_50%)]" />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-12 text-white">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-neutral-900 via-neutral-700 to-neutral-900 bg-clip-text text-transparent">
             A Five-Star Experience for Every Visitor
           </h2>
+          <p className="text-neutral-600 text-lg max-w-2xl mx-auto">
+            Tailored solutions that transform how you welcome and manage guests
+          </p>
         </motion.div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+
+        <div className="grid md:grid-cols-3 gap-8">
           {features.map((feature, index) => {
             const featureImage = PlaceHolderImages.find(p => p.id === feature.imageId);
+            
             return (
               <motion.div
-                key={index}
-                custom={index}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-                variants={cardVariants}
-                className="h-full"
+                key={feature.imageId}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                whileHover={{ y: -8 }}
+                className="group"
               >
-                <Card className="group relative h-full overflow-hidden rounded-2xl border-border bg-card shadow-lg transition-all duration-300 flex flex-col hover:shadow-primary/20">
-                  <motion.div className="relative w-full aspect-[16/10] overflow-hidden">
-                    {featureImage && (
-                       <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.5, ease: 'easeInOut' }} className="w-full h-full">
-                         <Image 
-                          src={featureImage.imageUrl}
-                          alt={feature.title}
-                          fill
-                          className="object-cover"
-                          data-ai-hint={featureImage.imageHint}
-                        />
-                       </motion.div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                  </motion.div>
-                  
-                  <CardContent className="p-6 bg-card/50 flex-grow flex flex-col justify-end">
-                    <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 transition-colors duration-300">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-2">{feature.description}</p>
+                <Card className="overflow-hidden border-neutral-200 hover:border-neutral-300 hover:shadow-2xl transition-all duration-500 h-full bg-white/80 backdrop-blur-sm">
+                  <CardContent className="p-0">
+                    <div className="relative h-64 w-full overflow-hidden">
+                      {featureImage ? (
+                        <>
+                          <Image
+                            src={featureImage.imageUrl}
+                            alt={featureImage.description}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                          />
+                          {/* Gradient overlay on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        </>
+                      ) : (
+                        <div className="w-full h-full bg-red-500 flex items-center justify-center text-white font-bold">
+                          MISSING: {feature.imageId}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-6 relative">
+                      {/* Decorative line */}
+                      <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-green-500 mb-4 group-hover:w-full transition-all duration-500" />
+                      
+                      <h3 className="text-2xl font-bold mb-3 text-neutral-900 group-hover:text-blue-600 transition-colors duration-300">
+                        {feature.title}
+                      </h3>
+                      <p className="text-neutral-600 leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
                   </CardContent>
-
-                  {/* Subtle hover glow */}
-                  <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-yellow-400/50 transition-all duration-300 pointer-events-none"></div>
                 </Card>
               </motion.div>
             );

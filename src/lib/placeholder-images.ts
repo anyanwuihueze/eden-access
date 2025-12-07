@@ -1,10 +1,72 @@
-import data from './placeholder-images.json';
-
-export type ImagePlaceholder = {
-  id: string;
-  description: string;
-  imageUrl: string;
-  imageHint: string;
+const placeholderData = {
+  "placeholderImages": [
+    {
+      "id": "guest-selfie-1",
+      "description": "A smiling man's selfie.",
+      "imageUrl": "https://images.unsplash.com/photo-1614750344860-bb819c28ff32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwc2VsZmllfGVufDB8fHx8MTc2NDMyOTgyOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man selfie"
+    },
+    {
+      "id": "guest-selfie-2",
+      "description": "A smiling woman's selfie.",
+      "imageUrl": "https://images.unsplash.com/photo-1546961342-ea5f71b193f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHNlbGZpZXxlbnwwfHx8fDE3NjQzNTQzMjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman selfie"
+    },
+    {
+      "id": "resident-avatar",
+      "description": "Avatar for a resident.",
+      "imageUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjQzNjgzMjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "guard-avatar",
+      "description": "Avatar for a guard.",
+      "imageUrl": "https://images.unsplash.com/photo-1587647069256-6ec77c96c2a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c2VjdXJpdHklMjBndWFyZHxlbnwwfHx8fDE3NjQ0MTQ3ODd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "security guard"
+    },
+    {
+      "id": "hero-image",
+      "description": "A modern luxury estate.",
+      "imageUrl": "https://images.unsplash.com/photo-1574848296471-28f79a036f79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzY0MzIxMjMyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern architecture"
+    },
+    {
+      "id": "dashboard-admin",
+      "description": "A dashboard showing admin-level analytics and real-time activity.",
+      "imageUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxkYXRhJTIwZGFzaGJvYXJkfGVufDB8fHx8MTc2NDczMDE2Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "data dashboard"
+    },
+    {
+      "id": "dashboard-resident",
+      "description": "A user-friendly dashboard for residents to generate guest codes.",
+      "imageUrl": "https://images.unsplash.com/photo-1654764451078-de55e650649e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YXBwJTIwaW50ZXJmYWNlfGVufDB8fHx8MTc2NDY4MTA0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "app interface"
+    },
+    {
+      "id": "dashboard-guest",
+      "description": "A guest taking a selfie on their phone for verification.",
+      "imageUrl": "https://images.unsplash.com/photo-1713261162282-57dd8043329a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwaG9uZSUyMHNlbGZpZXxlbnwwfHx8fDE3NjQ3Nzc0NzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "phone selfie"
+    },
+    {
+      "id": "card-luxury-estate",
+      "description": "The entrance to a modern, luxurious gated community.",
+      "imageUrl": "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+      "imageHint": "modern gate estate"
+    },
+    {
+      "id": "card-premium-hotel",
+      "description": "The sleek and modern lobby of a premium hotel.",
+      "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+      "imageHint": "hotel lobby modern"
+    },
+    {
+      "id": "card-corporate-office",
+      "description": "The exterior of a modern, professional corporate office building.",
+      "imageUrl": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+      "imageHint": "corporate building glass"
+    }
+  ]
 };
 
-export const PlaceHolderImages: ImagePlaceholder[] = data.placeholderImages;
+export const PlaceHolderImages = placeholderData.placeholderImages;

@@ -51,20 +51,20 @@
     {
       "id": "card-luxury-estate",
       "description": "The entrance to a modern, luxurious gated community.",
-      "imageUrl": "https://images.unsplash.com/photo-1588698188724-034a364d2b9a?q=80&w=1920&auto=format&fit=crop",
-      "imageHint": "modern gate night"
+      "imageUrl": "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+      "imageHint": "modern gate estate"
     },
     {
       "id": "card-premium-hotel",
       "description": "The sleek and modern lobby of a premium hotel.",
-      "imageUrl": "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=1920&auto=format&fit=crop",
+      "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
       "imageHint": "hotel lobby modern"
     },
     {
       "id": "card-corporate-office",
       "description": "The exterior of a modern, professional corporate office building.",
-      "imageUrl": "https://images.unsplash.com/photo-1590650213763-d1446f1e85a5?q=80&w=1920&auto=format&fit=crop",
-      "imageHint": "corporate building modern"
+      "imageUrl": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
+      "imageHint": "corporate building glass"
     }
   ]
 }

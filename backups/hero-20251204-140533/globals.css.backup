@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 7.1%;
+    --foreground: 0 0% 98%;
+    --card: 50 65% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 50 65% 6%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 51 100% 50%;
+    --primary-foreground: 50 65% 6%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 48 100% 45%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 51 100% 50%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+  
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    background-image: radial-gradient(circle at top right, hsl(var(--primary) / 0.1), transparent 40%),
+                      radial-gradient(circle at bottom left, hsl(var(--accent) / 0.1), transparent 40%);
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Re-enable text selection for content */
+  p, h1, h2, h3, h4, h5, h6, span, div {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  
+  /* Prevent text selection on UI */
+  button, a, [role="button"], nav, header {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Images */
+  img {
+    max-width: 100%;
+    height: auto;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+  
+  /* Touch targets */
+  button, a {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Input zoom fix for iOS */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Button touch feedback - PROPER WAY */
+button, [role="button"] {
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  cursor: pointer;
+}
+
+button:active, [role="button"]:active {
+  opacity: 0.7;
+  transform: translateY(1px);
+}
+
+/* Card/interactive touch feedback */
+.card, [data-interactive="true"] {
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.card:active, [data-interactive="true"]:active {
+  opacity: 0.95;
+  transform: scale(0.98);
+}
+
+/* PWA Standalone mode */
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Disable long-press menu */
+* {
+  -webkit-touch-callout: none;
+}
+
+/* Hide scrollbars but keep functionality */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
