@@ -9,11 +9,9 @@ const withPWA = require('next-pwa')({
 
 const nextConfig = {
   output: 'standalone',
+  turbopack: {},
   typescript: {
     ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   images: {
     remotePatterns: [
