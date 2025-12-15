@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import SelfieCapture from './components/selfie-capture';
 import Vapi from '@vapi-ai/web';
 import { motion } from 'framer-motion';
-import { CheckCircle, Loader, Mic, Camera, ShieldCheck, PhoneCall } from 'lucide-react';
+import { CheckCircle, Loader, ShieldCheck, PhoneCall, LogOut, PhoneOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface GuestVisit {
@@ -13,54 +13,111 @@ interface GuestVisit {
   status: 'pending' | 'pending_approval' | 'approved' | 'checked_in' | 'checked_out';
 }
 
-export default function GuestPage({ params }: { params: { accessCode: string } }) {
-  const { accessCode } = params;
+export default function GuestPage({ params }: { params: Promise<{ accessCode: string }> }) {
+  const { accessCode } = use(params);
   const vapiRef = useRef<Vapi | null>(null);
   const [callActive, setCallActive] = useState(false);
-  const [callStarted, setCallStarted] = useState(false);
+  const [checkinCallStarted, setCheckinCallStarted] = useState(false);
+  const [checkoutCallStarted, setCheckoutCallStarted] = useState(false);
   const [visit, setVisit] = useState<GuestVisit | null>(null);
   const [loading, setLoading] = useState(true);
   const [selfieSubmitted, setSelfieSubmitted] = useState(false);
 
   useEffect(() => {
-    async function fetchVisitDetails() {
+    let isMounted = true;
+
+    const fetchVisitDetails = async () => {
       try {
         const res = await fetch(`/api/guest-visits/verify/${accessCode}`);
         if (!res.ok) {
           throw new Error('Verification failed');
         }
         const data = await res.json();
-        setVisit(data);
-        if (data.status === 'pending_approval' || data.status === 'approved' || data.status === 'checked_in') {
-          setSelfieSubmitted(true);
+        if (isMounted) {
+          setVisit(data);
+          if (data.status === 'pending_approval' || data.status === 'approved' || data.status === 'checked_in') {
+            setSelfieSubmitted(true);
+          }
         }
       } catch (error) {
         console.error('Error fetching visit details:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    }
+    };
 
     fetchVisitDetails();
 
-    vapiRef.current = new Vapi(process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY!);
-    vapiRef.current.on('call-start', () => setCallActive(true));
-    vapiRef.current.on('call-end', () => setCallActive(false));
+    const publicKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
+    if (!publicKey) {
+      console.error('VAPI public key is missing');
+      return;
+    }
+
+    vapiRef.current = new Vapi(publicKey);
+    
+    vapiRef.current.on('call-start', () => {
+      if (isMounted) setCallActive(true);
+    });
+    
+    vapiRef.current.on('call-end', () => {
+      if (isMounted) setCallActive(false);
+    });
+    
     vapiRef.current.on('error', (e) => {
       console.error('VAPI error:', e);
-      setCallActive(false);
+      if (isMounted) setCallActive(false);
     });
 
-    return () => vapiRef.current?.stop();
+    return () => {
+      isMounted = false;
+      if (vapiRef.current) {
+        vapiRef.current.stop();
+      }
+    };
   }, [accessCode]);
+  
+  const endCall = () => {
+    if (vapiRef.current) {
+        vapiRef.current.stop();
+    }
+  }
 
-  const startWelcomeCall = async () => {
-    if (!vapiRef.current || callStarted) return;
-    setCallStarted(true);
+  const startCheckinCall = async () => {
+    if (!vapiRef.current || checkinCallStarted) return;
+    
+    const checkinId = process.env.NEXT_PUBLIC_VAPI_CHECKIN_ASSISTANT_ID;
+    if (!checkinId) {
+      console.error('Check-in assistant ID is missing');
+      return;
+    }
+
+    setCheckinCallStarted(true);
     try {
-      await vapiRef.current.start(process.env.NEXT_PUBLIC_VAPI_WELCOME_ASSISTANT_ID!);
+      await vapiRef.current.start(checkinId);
     } catch (error) {
-      console.error('VAPI call failed:', error);
+      console.error('VAPI check-in call failed:', error);
+      setCheckinCallStarted(false);
+    }
+  };
+
+  const startCheckoutCall = async () => {
+    if (!vapiRef.current || checkoutCallStarted) return;
+    
+    const checkoutId = process.env.NEXT_PUBLIC_VAPI_CHECKOUT_ASSISTANT_ID;
+    if (!checkoutId) {
+      console.error('Check-out assistant ID is missing');
+      return;
+    }
+
+    setCheckoutCallStarted(true);
+    try {
+      await vapiRef.current.start(checkoutId);
+    } catch (error) {
+      console.error('VAPI check-out call failed:', error);
+      setCheckoutCallStarted(false);
     }
   };
 
@@ -69,10 +126,10 @@ export default function GuestPage({ params }: { params: { accessCode: string } }
   };
 
   const getStepStatus = (step: number) => {
-    if (step === 1) return callStarted ? 'completed' : 'current';
+    if (step === 1) return checkinCallStarted ? 'completed' : 'current';
     if (step === 2) {
       if (selfieSubmitted) return 'completed';
-      return callStarted ? 'current' : 'pending';
+      return checkinCallStarted ? 'current' : 'pending';
     }
     if (step === 3) {
         return selfieSubmitted ? 'current' : 'pending';
@@ -115,21 +172,28 @@ export default function GuestPage({ params }: { params: { accessCode: string } }
 
         {/* Step-by-Step Flow */}
         <div className="mt-12 space-y-8">
-            {/* Step 1: Talk to Eve */}
-            <StepCard step={1} title="Talk to Eve, Your AI Concierge" status={getStepStatus(1)}>
+            {/* Step 1: Check In with Eve */}
+            <StepCard step={1} title="Check In with Eve" status={getStepStatus(1)}>
                 <p className="text-muted-foreground mb-6">Press the button below to get important arrival instructions from our AI assistant, Eve.</p>
-                {!callStarted ? (
-                    <Button onClick={startWelcomeCall} size="lg" className="gap-3 text-lg h-14 px-8">
+                {!checkinCallStarted ? (
+                    <Button onClick={startCheckinCall} size="lg" className="gap-3 text-lg h-14 px-8">
                         <PhoneCall className="w-5 h-5"/>
-                        Talk to Eve
+                        Check In with Eve
                     </Button>
                 ) : (
-                    <div className="bg-card border border-green-500/30 rounded-lg p-4 flex items-center justify-center gap-3">
-                         <div className="relative flex items-center justify-center">
-                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                            <div className="absolute w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                    <div className="flex items-center justify-center gap-4">
+                        <div className="bg-card border border-green-500/30 rounded-lg p-4 flex items-center justify-center gap-3">
+                            <div className="relative flex items-center justify-center">
+                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                <div className="absolute w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                            </div>
+                            <span className="text-green-400 font-semibold">{callActive ? "Eve is speaking..." : "Call Completed"}</span>
                         </div>
-                        <span className="text-green-400 font-semibold">{callActive ? "Eve is speaking..." : "Call Completed"}</span>
+                        {callActive && (
+                            <Button onClick={endCall} variant="destructive" size="icon" className="h-14 w-14">
+                                <PhoneOff className="w-6 h-6"/>
+                            </Button>
+                        )}
                     </div>
                 )}
             </StepCard>
@@ -147,6 +211,32 @@ export default function GuestPage({ params }: { params: { accessCode: string } }
             {/* Step 3: Awaiting Approval */}
             <StepCard step={3} title="Await Gate Clearance" status={getStepStatus(3)}>
                 <p className="text-muted-foreground">Thank you. Your host has been notified. Please proceed to the gate where our security team will grant you access momentarily.</p>
+            </StepCard>
+
+            {/* Step 4: Check Out with Eve */}
+            <StepCard step={4} title="Check Out with Eve" status="current">
+                <p className="text-muted-foreground mb-6">Leaving soon? Share your experience with Eve before you go.</p>
+                {!checkoutCallStarted ? (
+                    <Button onClick={startCheckoutCall} size="lg" variant="outline" className="gap-3 text-lg h-14 px-8">
+                        <LogOut className="w-5 h-5"/>
+                        Check Out with Eve
+                    </Button>
+                ) : (
+                    <div className="flex items-center justify-center gap-4">
+                        <div className="bg-card border border-green-500/30 rounded-lg p-4 flex items-center justify-center gap-3">
+                            <div className="relative flex items-center justify-center">
+                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                <div className="absolute w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                            </div>
+                            <span className="text-green-400 font-semibold">{callActive ? "Eve is listening..." : "Thank you for your feedback!"}</span>
+                        </div>
+                         {callActive && (
+                            <Button onClick={endCall} variant="destructive" size="icon" className="h-14 w-14">
+                                <PhoneOff className="w-6 h-6"/>
+                            </Button>
+                        )}
+                    </div>
+                )}
             </StepCard>
         </div>
 
