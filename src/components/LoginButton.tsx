@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function AdminAuth() {
+export default function LoginButton() {
   const router = useRouter();
 
   const handleLoginClick = () => {

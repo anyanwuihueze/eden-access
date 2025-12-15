@@ -2,6 +2,12 @@
 import { supabase } from "@/lib/supabaseClient";
 
 export async function uploadSelfie(file: File, accessCode: string) {
+  // Check if supabase client is initialized
+  if (!supabase) {
+    console.error("Supabase client not initialized");
+    return null;
+  }
+
   const fileName = `selfies/${accessCode}.jpg`;
   
   // Upload file

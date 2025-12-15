@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-image');
@@ -25,39 +26,49 @@ export default function LoginPage() {
         />
       )}
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-black/60" />
 
       {/* Content */}
-      <div className="relative z-10 grid lg:grid-cols-2 h-dvh">
-        <div className="flex flex-col justify-center bg-background/80 backdrop-blur-sm p-8 md:p-16">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="max-w-md mx-auto lg:mx-0"
-          >
-            <div className="mb-8">
+      <div className="relative z-10 flex items-center justify-center min-h-dvh p-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="w-full max-w-lg rounded-2xl bg-background/80 backdrop-blur-lg p-8 md:p-12 border border-border"
+        >
+          <div className="text-center mb-8">
+            <div className="inline-block">
               <Logo />
             </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-              Seamless Access for Modern Estates
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-white">
+              Select Your Role
             </h2>
-            <p className="mt-6 text-lg text-muted-foreground">
-              AI-powered verification for residents and guests, ensuring top-tier security and a five-star experience. Welcome to the future of estate management.
+            <p className="mt-2 text-muted-foreground">
+              Please choose your sign-in portal to continue.
             </p>
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
-              <Button size="lg" asChild>
-                <Link href="/resident/dashboard">Resident Sign-In</Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/guard/dashboard">Guard Sign-In</Link>
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-        
-        {/* Empty column for spacing, allows background image to be visible on desktop */}
-        <div className="hidden lg:block"></div>
+          </div>
+
+          <div className="space-y-4">
+            <Button size="lg" className="w-full justify-between h-16 text-lg" asChild>
+              <Link href="/login/resident">
+                <span>Resident Sign-In</span>
+                <ArrowRight />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="w-full justify-between h-16 text-lg" asChild>
+              <Link href="/login/guard">
+                <span>Guard Sign-In</span>
+                 <ArrowRight />
+              </Link>
+            </Button>
+            <Button size="lg" variant="secondary" className="w-full justify-between h-16 text-lg" asChild>
+              <Link href="/login/admin">
+                <span>Admin Sign-In</span>
+                 <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
