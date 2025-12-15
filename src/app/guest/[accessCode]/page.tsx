@@ -1,161 +1,197 @@
 'use client';
 
-import { use, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SelfieCapture from './components/selfie-capture';
 import Vapi from '@vapi-ai/web';
+import { motion } from 'framer-motion';
+import { CheckCircle, Loader, Mic, Camera, ShieldCheck, PhoneCall } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-export default function GuestPage({ params }: { params: Promise<{ accessCode: string }> }) {
-  const { accessCode } = use(params);
+interface GuestVisit {
+  guest_name: string;
+  resident_name: string;
+  status: 'pending' | 'pending_approval' | 'approved' | 'checked_in' | 'checked_out';
+}
+
+export default function GuestPage({ params }: { params: { accessCode: string } }) {
+  const { accessCode } = params;
   const vapiRef = useRef<Vapi | null>(null);
   const [callActive, setCallActive] = useState(false);
   const [callStarted, setCallStarted] = useState(false);
+  const [visit, setVisit] = useState<GuestVisit | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selfieSubmitted, setSelfieSubmitted] = useState(false);
 
   useEffect(() => {
-    if (!vapiRef.current) {
-      vapiRef.current = new Vapi(process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY!);
-
-      vapiRef.current.on('call-start', () => {
-        console.log('Call started');
-        setCallActive(true);
-      });
-
-      vapiRef.current.on('call-end', () => {
-        console.log('Call ended');
-        setCallActive(false);
-      });
-
-      vapiRef.current.on('error', (error) => {
-        console.error('VAPI error:', error);
-        setCallActive(false);
-        alert('Voice call failed. Please check microphone permissions.');
-      });
+    async function fetchVisitDetails() {
+      try {
+        const res = await fetch(`/api/guest-visits/verify/${accessCode}`);
+        if (!res.ok) {
+          throw new Error('Verification failed');
+        }
+        const data = await res.json();
+        setVisit(data);
+        if (data.status === 'pending_approval' || data.status === 'approved' || data.status === 'checked_in') {
+          setSelfieSubmitted(true);
+        }
+      } catch (error) {
+        console.error('Error fetching visit details:', error);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    return () => {
-      if (vapiRef.current) {
-        vapiRef.current.stop();
-      }
-    };
-  }, []);
+    fetchVisitDetails();
+
+    vapiRef.current = new Vapi(process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY!);
+    vapiRef.current.on('call-start', () => setCallActive(true));
+    vapiRef.current.on('call-end', () => setCallActive(false));
+    vapiRef.current.on('error', (e) => {
+      console.error('VAPI error:', e);
+      setCallActive(false);
+    });
+
+    return () => vapiRef.current?.stop();
+  }, [accessCode]);
 
   const startWelcomeCall = async () => {
     if (!vapiRef.current || callStarted) return;
-
+    setCallStarted(true);
     try {
-      setCallStarted(true);
-      setCallActive(true);
       await vapiRef.current.start(process.env.NEXT_PUBLIC_VAPI_WELCOME_ASSISTANT_ID!);
     } catch (error) {
       console.error('VAPI call failed:', error);
-      alert('Failed to start voice call: ' + JSON.stringify(error));
-      setCallActive(false);
-      setCallStarted(false);
     }
   };
 
-  const stopCall = () => {
-    if (vapiRef.current) {
-      vapiRef.current.stop();
-      setCallActive(false);
-    }
+  const handleSelfieSubmitted = () => {
+    setSelfieSubmitted(true);
   };
+
+  const getStepStatus = (step: number) => {
+    if (step === 1) return callStarted ? 'completed' : 'current';
+    if (step === 2) {
+      if (selfieSubmitted) return 'completed';
+      return callStarted ? 'current' : 'pending';
+    }
+    if (step === 3) {
+        return selfieSubmitted ? 'current' : 'pending';
+    }
+    return 'pending';
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background text-white font-body">
+      <div className="absolute inset-0 opacity-[0.1] bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:48px_48px]"></div>
+      
+      <div className="relative max-w-2xl mx-auto px-4 py-12 text-center">
         {/* Header */}
-        <div className="text-center mb-8">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
-              <svg className="w-7 h-7 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h1 className="text-4xl font-bold text-white">Eden Access</h1>
+            <ShieldCheck className="w-10 h-10 text-primary" />
+            <h1 className="text-4xl font-bold">Eden Access</h1>
           </div>
-          <p className="text-lg text-gray-300">Chevy View Estate - Guest Verification</p>
-          <div className="mt-3 inline-block bg-gray-800 px-5 py-2 rounded-full shadow-lg border border-yellow-400">
-            <span className="text-sm text-gray-400">Access Code: </span>
-            <span className="font-mono font-bold text-yellow-400 text-lg">{accessCode}</span>
-          </div>
-        </div>
-
-        {/* AI Concierge Card */}
-        <div className="bg-gray-800 rounded-2xl shadow-2xl p-6 mb-6 border border-gray-700">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-md">
-              <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-white">AI Concierge Service</h2>
-              <p className="text-sm text-gray-400">Maya is here to assist you</p>
-            </div>
-          </div>
-
-          {!callStarted && (
-            <div className="text-center py-4">
-              <button
-                onClick={startWelcomeCall}
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 font-bold px-8 py-4 rounded-xl shadow-lg transition-all transform hover:scale-105"
-              >
-                <div className="flex items-center gap-3">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                  </svg>
-                  <span>Talk to Maya</span>
-                </div>
-              </button>
-              <p className="text-xs text-gray-400 mt-3">Click to hear important instructions</p>
-            </div>
+          {visit ? (
+            <>
+              <p className="text-xl text-foreground">Welcome, <span className="font-bold text-primary">{visit.guest_name}</span></p>
+              <p className="text-md text-muted-foreground">You are visiting <span className="font-semibold">{visit.resident_name}</span></p>
+            </>
+          ) : (
+             <p className="text-lg text-muted-foreground">Guest Verification Portal</p>
           )}
-
-          {callActive && (
-            <div className="bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 rounded-xl p-5 text-center">
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <div className="relative">
-                  <div className="w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
-                  <div className="absolute inset-0 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
-                </div>
-                <span className="text-yellow-400 font-semibold text-lg">Maya is speaking...</span>
-              </div>
-              <button
-                onClick={stopCall}
-                className="mt-2 text-sm text-red-400 hover:text-red-300 font-medium underline"
-              >
-                End Call
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Selfie Capture Card */}
-        <div className="bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-700">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center shadow-md">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-white">Security Verification</h2>
-              <p className="text-sm text-gray-400">Take a quick selfie for gate clearance</p>
-            </div>
+           <div className="mt-3 inline-block bg-card px-4 py-1.5 rounded-full border border-border">
+            <span className="text-xs text-muted-foreground">Access Code: </span>
+            <span className="font-mono font-bold text-primary text-md">{accessCode}</span>
           </div>
+        </motion.div>
 
-          <SelfieCapture accessCode={accessCode} />
+        {/* Step-by-Step Flow */}
+        <div className="mt-12 space-y-8">
+            {/* Step 1: Talk to Eve */}
+            <StepCard step={1} title="Talk to Eve, Your AI Concierge" status={getStepStatus(1)}>
+                <p className="text-muted-foreground mb-6">Press the button below to get important arrival instructions from our AI assistant, Eve.</p>
+                {!callStarted ? (
+                    <Button onClick={startWelcomeCall} size="lg" className="gap-3 text-lg h-14 px-8">
+                        <PhoneCall className="w-5 h-5"/>
+                        Talk to Eve
+                    </Button>
+                ) : (
+                    <div className="bg-card border border-green-500/30 rounded-lg p-4 flex items-center justify-center gap-3">
+                         <div className="relative flex items-center justify-center">
+                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <div className="absolute w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                        </div>
+                        <span className="text-green-400 font-semibold">{callActive ? "Eve is speaking..." : "Call Completed"}</span>
+                    </div>
+                )}
+            </StepCard>
+
+            {/* Step 2: Security Selfie */}
+            <StepCard step={2} title="Security Verification" status={getStepStatus(2)}>
+                 <p className="text-muted-foreground mb-6">Please provide a quick selfie. This photo will be used by our security team to verify your identity at the gate.</p>
+                 <SelfieCapture 
+                    accessCode={accessCode} 
+                    onSelfieSubmitted={handleSelfieSubmitted} 
+                    disabled={getStepStatus(2) === 'pending'}
+                />
+            </StepCard>
+
+            {/* Step 3: Awaiting Approval */}
+            <StepCard step={3} title="Await Gate Clearance" status={getStepStatus(3)}>
+                <p className="text-muted-foreground">Thank you. Your host has been notified. Please proceed to the gate where our security team will grant you access momentarily.</p>
+            </StepCard>
         </div>
 
         {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-400">
-            🔒 Your photo is encrypted and securely stored for verification purposes only
+        <div className="mt-12 text-center">
+          <p className="text-xs text-muted-foreground">
+            🔒 Your photo is encrypted and used for verification purposes only.
           </p>
         </div>
       </div>
     </div>
   );
+}
+
+function StepCard({ step, title, status, children }: { step: number, title: string, status: 'completed' | 'current' | 'pending', children: React.ReactNode}) {
+    const isPending = status === 'pending';
+
+    const variants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 },
+    };
+
+    return (
+        <motion.div
+            variants={variants}
+            initial="hidden"
+            animate="visible"
+            transition={{ duration: 0.5, delay: step * 0.2 }}
+            className={`bg-card border-l-4 p-8 rounded-lg shadow-lg text-left transition-all duration-300 ${
+                status === 'completed' ? 'border-green-500' :
+                status === 'current' ? 'border-primary' : 'border-border'
+            } ${isPending ? 'opacity-50' : 'opacity-100'}`}
+        >
+            <div className="flex items-center gap-4 mb-4">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${
+                     status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                     status === 'current' ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground'
+                }`}>
+                    {status === 'completed' ? <CheckCircle className="w-6 h-6" /> : step}
+                </div>
+                <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+            </div>
+            <div className={`pl-14 ${isPending ? 'pointer-events-none' : ''}`}>
+                {children}
+            </div>
+        </motion.div>
+    )
 }

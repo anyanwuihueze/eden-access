@@ -33,6 +33,13 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      // ADD THIS ONE - YOUR SUPABASE STORAGE
+      {
+        protocol: 'https',
+        hostname: 'bvsrzbvfniomzamhdzfs.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
   },
 };
