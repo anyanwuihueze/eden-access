@@ -76,7 +76,7 @@ export function GenerateCodeForm() {
 
   const copyToClipboard = () => {
     if (generatedCode) {
-      navigator.clipboard.writeText(`Your access link for Eden Estate: ${generatedCode.accessLink}`);
+      navigator.clipboard.writeText(generatedCode.accessLink);
       alert('Link copied to clipboard!');
     }
   };

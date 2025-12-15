@@ -38,8 +38,8 @@ export default function ResidentLayout({
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-                <Button size="sm" className="w-full">
-                  Complete Profile
+                <Button size="sm" className="w-full" asChild>
+                  <Link href="/resident/profile">Complete Profile</Link>
                 </Button>
               </CardContent>
             </Card>

@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Home, LineChart, ShieldAlert } from 'lucide-react';
+import { Home, LineChart, ShieldAlert, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const navItems = [
   { href: '/resident/dashboard', icon: Home, label: 'Dashboard' },
   { href: '/resident/approvals', icon: ShieldAlert, label: 'Approvals', badge: '3' },
   { href: '/resident/analytics', icon: LineChart, label: 'Analytics' },
+  { href: '/resident/profile', icon: User, label: 'Profile' },
 ];
 
 export function ResidentSidebarNav() {
