@@ -13,12 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ResidentSidebarNav } from './sidebar-nav';
-import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function ResidentHeader() {
-  const residentAvatar = PlaceHolderImages.find(p => p.id === 'resident-avatar');
-
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
       <Sheet>
@@ -46,16 +42,12 @@ export function ResidentHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full">
-            {residentAvatar ? (
-                <Image src={residentAvatar.imageUrl} width={36} height={36} alt="Resident Avatar" className="rounded-full" data-ai-hint={residentAvatar.imageHint}/>
-            ) : (
-                <CircleUser className="h-5 w-5" />
-            )}
+            <CircleUser className="h-5 w-5" />
             <span className="sr-only">Toggle user menu</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel>Resident Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>Settings</DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>
