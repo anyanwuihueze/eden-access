@@ -39,7 +39,7 @@ export function AuthForm({ role }: AuthFormProps) {
     setIsLoading(true);
     setError('');
     
-    console.log('�� Attempting sign in:', values.email);
+    console.log(' Attempting sign in:', values.email);
     
     try {
       // Sign in with Firebase
@@ -57,7 +57,7 @@ export function AuthForm({ role }: AuthFormProps) {
       } else if (role === 'Guard') {
         router.push('/guard/dashboard');
       } else if (role === 'Admin') {
-        router.push('/admin/dashboard');
+        router.push('/admin');
       }
       
     } catch (err: any) {
