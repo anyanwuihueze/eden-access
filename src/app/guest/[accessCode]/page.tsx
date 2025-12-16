@@ -1,11 +1,13 @@
 'use client';
 
-import { use, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'next/navigation';
 import SelfieCapture from './components/selfie-capture';
 import Vapi from '@vapi-ai/web';
 import { motion } from 'framer-motion';
-import { CheckCircle, Loader, ShieldCheck, PhoneCall, LogOut, PhoneOff } from 'lucide-react';
+import { CheckCircle, Loader, ShieldCheck, PhoneCall, LogOut, PhoneOff, AlertCircle, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface GuestVisit {
   guest_name: string;
@@ -13,15 +15,44 @@ interface GuestVisit {
   status: 'pending' | 'pending_approval' | 'approved' | 'checked_in' | 'checked_out';
 }
 
-export default function GuestPage({ params }: { params: Promise<{ accessCode: string }> }) {
-  const { accessCode } = use(params);
+// Suppress harmless console warnings for presentation
+if (typeof window !== 'undefined') {
+  const originalError = console.error;
+  console.error = (...args) => {
+    const errorString = args.join(' ');
+    if (
+      errorString.includes('Ignoring settings for browser- or platform-unsupported input processor(s): audio') ||
+      errorString.includes('Generator.next') ||
+      errorString.includes('Requested device not found') ||
+      errorString.includes('microphone')
+    ) {
+      return;
+    }
+    originalError.apply(console, args);
+  };
+}
+
+export default function GuestPage() {
+  const params = useParams();
+  const accessCode = params?.accessCode as string;
+  
   const vapiRef = useRef<Vapi | null>(null);
+  const isInitializedRef = useRef(false);
   const [callActive, setCallActive] = useState(false);
   const [checkinCallStarted, setCheckinCallStarted] = useState(false);
   const [checkoutCallStarted, setCheckoutCallStarted] = useState(false);
   const [visit, setVisit] = useState<GuestVisit | null>(null);
   const [loading, setLoading] = useState(true);
   const [selfieSubmitted, setSelfieSubmitted] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
+
+  if (!accessCode) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -29,9 +60,8 @@ export default function GuestPage({ params }: { params: Promise<{ accessCode: st
     const fetchVisitDetails = async () => {
       try {
         const res = await fetch(`/api/guest-visits/verify/${accessCode}`);
-        if (!res.ok) {
-          throw new Error('Verification failed');
-        }
+        if (!res.ok) throw new Error('Verification failed');
+        
         const data = await res.json();
         if (isMounted) {
           setVisit(data);
@@ -42,82 +72,225 @@ export default function GuestPage({ params }: { params: Promise<{ accessCode: st
       } catch (error) {
         console.error('Error fetching visit details:', error);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchVisitDetails();
 
-    const publicKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
-    if (!publicKey) {
-      console.error('VAPI public key is missing');
-      return;
-    }
+    const initializeVapi = () => {
+      if (isInitializedRef.current || vapiRef.current) {
+        console.log('VAPI already initialized');
+        return;
+      }
 
-    vapiRef.current = new Vapi(publicKey);
-    
-    vapiRef.current.on('call-start', () => {
-      if (isMounted) setCallActive(true);
-    });
-    
-    vapiRef.current.on('call-end', () => {
-      if (isMounted) setCallActive(false);
-    });
-    
-    vapiRef.current.on('error', (e) => {
-      console.error('VAPI error:', e);
-      if (isMounted) setCallActive(false);
-    });
+      const publicKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
+      if (!publicKey) {
+        console.error('VAPI public key is missing');
+        setMicError('Configuration error: Missing API key');
+        return;
+      }
+
+      try {
+        console.log('Initializing VAPI...');
+        vapiRef.current = new Vapi(publicKey);
+        isInitializedRef.current = true;
+        
+        vapiRef.current.on('call-start', () => {
+          console.log('✅ Call started successfully');
+          if (isMounted) {
+            setCallActive(true);
+            setMicError(null);
+            console.log('State updated: callActive = true');
+          }
+        });
+        
+        vapiRef.current.on('call-end', () => {
+          console.log('✅ Call ended');
+          if (isMounted) {
+            setCallActive(false);
+            setCheckinCallStarted(false);
+            setCheckoutCallStarted(false);
+            console.log('State updated: callActive = false');
+          }
+        });
+        
+        vapiRef.current.on('speech-start', () => {
+          console.log('🎤 User started speaking');
+          if (isMounted && !callActive) {
+            setCallActive(true);
+          }
+        });
+        
+        vapiRef.current.on('error', (error) => {
+          console.error('❌ VAPI error details:', error);
+          
+          if (!isMounted) return;
+          
+          setCallActive(false);
+          setCheckinCallStarted(false);
+          setCheckoutCallStarted(false);
+          
+          const errorMessage = error?.message || error?.error || String(error);
+          const errorName = error?.name || '';
+          
+          if (errorName === 'NotAllowedError' || errorMessage.includes('Permission denied')) {
+            setMicError('🎤 Microphone permission denied. Click the 🔒 icon in your browser address bar, allow microphone access, then refresh the page.');
+          } else if (errorName === 'NotFoundError' || errorMessage.includes('device not found') || errorMessage.includes('Requested device not found')) {
+            setMicError('🎤 No microphone detected. Please check:\n• A microphone is connected\n• No other apps are using it\n• Browser has microphone permission');
+          } else if (errorName === 'NotReadableError' || errorMessage.includes('not readable')) {
+            setMicError('🎤 Microphone is being used by another application. Close other apps and try again.');
+          } else if (errorMessage.includes('unsupported input processor')) {
+            console.warn('⚠️ Audio processor warning (non-critical):', errorMessage);
+            return;
+          } else {
+            setMicError(`Call failed: ${errorMessage}. Please refresh and try again.`);
+          }
+        });
+
+        console.log('✅ VAPI initialized successfully');
+      } catch (error) {
+        console.error('❌ Failed to initialize VAPI:', error);
+        setMicError('Failed to initialize voice system. Please refresh the page.');
+      }
+    };
+
+    initializeVapi();
 
     return () => {
       isMounted = false;
       if (vapiRef.current) {
-        vapiRef.current.stop();
+        try {
+          vapiRef.current.stop();
+          console.log('🧹 VAPI cleaned up');
+        } catch (e) {
+          console.error('Error cleaning up VAPI:', e);
+        }
       }
     };
   }, [accessCode]);
   
   const endCall = () => {
-    if (vapiRef.current) {
-        vapiRef.current.stop();
+    console.log('🛑 Ending call manually...');
+    if (!vapiRef.current) {
+      console.warn('No VAPI instance to stop');
+      return;
     }
-  }
+    
+    try {
+      vapiRef.current.stop();
+      setCallActive(false);
+      setCheckinCallStarted(false);
+      setCheckoutCallStarted(false);
+      console.log('✅ Call ended manually');
+    } catch (error) {
+      console.error('❌ Error ending call:', error);
+    }
+  };
 
   const startCheckinCall = async () => {
-    if (!vapiRef.current || checkinCallStarted) return;
+    console.log('🚀 Starting check-in call...');
+    if (!vapiRef.current || checkinCallStarted || callActive) {
+      console.log('⚠️ Call already in progress or VAPI not ready');
+      return;
+    }
+    
+    setMicError(null);
     
     const checkinId = process.env.NEXT_PUBLIC_VAPI_CHECKIN_ASSISTANT_ID;
     if (!checkinId) {
-      console.error('Check-in assistant ID is missing');
+      console.error('❌ Check-in assistant ID is missing');
+      setMicError('Configuration error: Missing assistant ID');
       return;
     }
 
     setCheckinCallStarted(true);
+    console.log('State set: checkinCallStarted = true');
+    
     try {
-      await vapiRef.current.start(checkinId);
-    } catch (error) {
-      console.error('VAPI check-in call failed:', error);
+      console.log('📞 Calling VAPI start()...');
+      
+      await vapiRef.current.start(checkinId, {
+        metadata: {
+          accessCode: accessCode,
+          timestamp: Date.now(),
+          type: 'checkin'
+        }
+      });
+      
+      console.log('✅ Check-in call request sent');
+    } catch (error: any) {
+      console.error('❌ Failed to start check-in call:', error);
+      
+      const errorMessage = error?.message || String(error);
+      const errorName = error?.name || '';
+      
+      if (errorName === 'NotAllowedError' || errorMessage.includes('Permission denied')) {
+        setMicError('🎤 Microphone access denied. Click the 🔒 icon in your browser address bar to allow microphone, then try again.');
+      } else if (errorName === 'NotFoundError' || errorMessage.includes('device not found')) {
+        setMicError('🎤 No microphone detected. Please check your device has a working microphone connected.');
+      } else if (errorMessage.includes('unsupported input processor')) {
+        console.warn('⚠️ Audio processor warning (attempting to continue)');
+        return;
+      } else {
+        setMicError(`Failed to start call: ${errorMessage}. Please refresh and try again.`);
+      }
+      
       setCheckinCallStarted(false);
+      setCallActive(false);
     }
   };
 
   const startCheckoutCall = async () => {
-    if (!vapiRef.current || checkoutCallStarted) return;
+    console.log('🚀 Starting check-out call...');
+    if (!vapiRef.current || checkoutCallStarted || callActive) {
+      console.log('⚠️ Call already in progress or VAPI not ready');
+      return;
+    }
+    
+    setMicError(null);
     
     const checkoutId = process.env.NEXT_PUBLIC_VAPI_CHECKOUT_ASSISTANT_ID;
     if (!checkoutId) {
-      console.error('Check-out assistant ID is missing');
+      console.error('❌ Check-out assistant ID is missing');
+      setMicError('Configuration error: Missing assistant ID');
       return;
     }
 
     setCheckoutCallStarted(true);
+    console.log('State set: checkoutCallStarted = true');
+    
     try {
-      await vapiRef.current.start(checkoutId);
-    } catch (error) {
-      console.error('VAPI check-out call failed:', error);
+      console.log('📞 Calling VAPI start()...');
+      
+      await vapiRef.current.start(checkoutId, {
+        metadata: {
+          accessCode: accessCode,
+          timestamp: Date.now(),
+          type: 'checkout'
+        }
+      });
+      
+      console.log('✅ Check-out call request sent');
+    } catch (error: any) {
+      console.error('❌ Failed to start check-out call:', error);
+      
+      const errorMessage = error?.message || String(error);
+      const errorName = error?.name || '';
+      
+      if (errorName === 'NotAllowedError' || errorMessage.includes('Permission denied')) {
+        setMicError('🎤 Microphone access denied. Click the 🔒 icon in your browser address bar to allow microphone, then try again.');
+      } else if (errorName === 'NotFoundError' || errorMessage.includes('device not found')) {
+        setMicError('🎤 No microphone detected. Please check your device has a working microphone connected.');
+      } else if (errorMessage.includes('unsupported input processor')) {
+        console.warn('⚠️ Audio processor warning (attempting to continue)');
+        return;
+      } else {
+        setMicError(`Failed to start call: ${errorMessage}. Please refresh and try again.`);
+      }
+      
       setCheckoutCallStarted(false);
+      setCallActive(false);
     }
   };
 
@@ -170,18 +343,40 @@ export default function GuestPage({ params }: { params: Promise<{ accessCode: st
           </div>
         </motion.div>
 
+        {/* Microphone Error Alert */}
+        {micError && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }} 
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6"
+          >
+            <Alert variant="destructive" className="text-left">
+              <Mic className="h-5 w-5" />
+              <AlertDescription className="ml-2">
+                <div className="font-semibold mb-1">Microphone Issue</div>
+                <div className="text-sm whitespace-pre-line">{micError}</div>
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+
         {/* Step-by-Step Flow */}
         <div className="mt-12 space-y-8">
             {/* Step 1: Check In with Eve */}
             <StepCard step={1} title="Check In with Eve" status={getStepStatus(1)}>
                 <p className="text-muted-foreground mb-6">Press the button below to get important arrival instructions from our AI assistant, Eve.</p>
                 {!checkinCallStarted ? (
-                    <Button onClick={startCheckinCall} size="lg" className="gap-3 text-lg h-14 px-8">
+                    <Button 
+                      onClick={startCheckinCall} 
+                      size="lg" 
+                      className="gap-3 text-lg h-14 px-8"
+                      disabled={callActive}
+                    >
                         <PhoneCall className="w-5 h-5"/>
                         Check In with Eve
                     </Button>
                 ) : (
-                    <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center justify-center gap-4 flex-wrap">
                         <div className="bg-card border border-green-500/30 rounded-lg p-4 flex items-center justify-center gap-3">
                             <div className="relative flex items-center justify-center">
                                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -190,8 +385,14 @@ export default function GuestPage({ params }: { params: Promise<{ accessCode: st
                             <span className="text-green-400 font-semibold">{callActive ? "Eve is speaking..." : "Call Completed"}</span>
                         </div>
                         {callActive && (
-                            <Button onClick={endCall} variant="destructive" size="icon" className="h-14 w-14">
-                                <PhoneOff className="w-6 h-6"/>
+                            <Button 
+                              onClick={endCall} 
+                              variant="destructive" 
+                              size="lg"
+                              className="h-14 px-6 gap-2"
+                            >
+                                <PhoneOff className="w-5 h-5"/>
+                                End Call
                             </Button>
                         )}
                     </div>
@@ -217,12 +418,18 @@ export default function GuestPage({ params }: { params: Promise<{ accessCode: st
             <StepCard step={4} title="Check Out with Eve" status="current">
                 <p className="text-muted-foreground mb-6">Leaving soon? Share your experience with Eve before you go.</p>
                 {!checkoutCallStarted ? (
-                    <Button onClick={startCheckoutCall} size="lg" variant="outline" className="gap-3 text-lg h-14 px-8">
+                    <Button 
+                      onClick={startCheckoutCall} 
+                      size="lg" 
+                      variant="outline" 
+                      className="gap-3 text-lg h-14 px-8"
+                      disabled={callActive}
+                    >
                         <LogOut className="w-5 h-5"/>
                         Check Out with Eve
                     </Button>
                 ) : (
-                    <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center justify-center gap-4 flex-wrap">
                         <div className="bg-card border border-green-500/30 rounded-lg p-4 flex items-center justify-center gap-3">
                             <div className="relative flex items-center justify-center">
                                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -231,8 +438,14 @@ export default function GuestPage({ params }: { params: Promise<{ accessCode: st
                             <span className="text-green-400 font-semibold">{callActive ? "Eve is listening..." : "Thank you for your feedback!"}</span>
                         </div>
                          {callActive && (
-                            <Button onClick={endCall} variant="destructive" size="icon" className="h-14 w-14">
-                                <PhoneOff className="w-6 h-6"/>
+                            <Button 
+                              onClick={endCall} 
+                              variant="destructive" 
+                              size="lg"
+                              className="h-14 px-6 gap-2"
+                            >
+                                <PhoneOff className="w-5 h-5"/>
+                                End Call
                             </Button>
                         )}
                     </div>
