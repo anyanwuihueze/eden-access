@@ -1,7 +1,5 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { AuthForm } from '@/components/app/auth/auth-form';
 import { Logo } from '@/components/app/logo';
 import Link from 'next/link';
