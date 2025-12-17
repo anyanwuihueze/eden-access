@@ -46,18 +46,11 @@ export default function GuestPage() {
   const [selfieSubmitted, setSelfieSubmitted] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
 
-  if (!accessCode) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader className="w-8 h-8 text-primary animate-spin" />
-      </div>
-    );
-  }
-
   useEffect(() => {
     let isMounted = true;
 
     const fetchVisitDetails = async () => {
+      if (!accessCode) return;
       try {
         const res = await fetch(`/api/guest-visits/verify/${accessCode}`);
         if (!res.ok) throw new Error('Verification failed');
@@ -310,6 +303,14 @@ export default function GuestPage() {
     return 'pending';
   };
 
+  if (!accessCode) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -498,3 +499,5 @@ function StepCard({ step, title, status, children }: { step: number, title: stri
         </motion.div>
     )
 }
+
+    
