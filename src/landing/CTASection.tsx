@@ -1,4 +1,3 @@
-
 'use client';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -19,6 +18,7 @@ export default function CTASection() {
           Join the waitlist and be the first to experience the future of estate management.
         </p>
         <Button 
+          variant={null}
           size="lg"
           className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold text-lg px-8 py-6 rounded-xl shadow-2xl hover:shadow-yellow-400/50 transition-all transform hover:scale-105"
         >
@@ -28,5 +28,3 @@ export default function CTASection() {
     </section>
   );
 }
-
-    
