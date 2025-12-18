@@ -29,8 +29,8 @@ export async function generateGuestAccessCode(
   // Generate a random 6-digit code
   const accessCode = Math.floor(100000 + Math.random() * 900000).toString();
   
-  // Build the access link with your actual domain
-  const baseUrl = 'https://9000-firebase-studio-1764413759611.cluster-fbfjltn375c6wqxlhoehbz44sk.cloudworkstations.dev';
+  // Use environment variable for the base URL, with a fallback for local dev
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
   const accessLink = `${baseUrl}/guest/${accessCode}`;
   
   return {
