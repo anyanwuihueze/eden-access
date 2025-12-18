@@ -221,29 +221,22 @@ export default function Hero() {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.6, duration: 0.8 }}
             >
-              <motion.div
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 1.8, duration: 0.6, type: "spring" }}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-black font-bold text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 rounded-xl shadow-2xl hover:shadow-yellow-400/50 transition-all relative overflow-hidden group"
-                  asChild
+              <Link href="/demo">
+                <motion.div
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 1.8, duration: 0.6, type: "spring" }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <Link href="/demo">
-                    <span className="relative z-10">Book 15-Min Demo</span>
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-yellow-500"
-                      initial={{ x: '-100%' }}
-                      whileHover={{ x: '100%' }}
-                      transition={{ duration: 0.5 }}
-                    />
-                  </Link>
-                </Button>
-              </motion.div>
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto !bg-yellow-400 hover:!bg-yellow-500 !text-black font-bold text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 rounded-xl shadow-2xl hover:shadow-yellow-400/50 transition-all"
+                  >
+                    Book 15-Min Demo
+                  </Button>
+                </motion.div>
+              </Link>
 
               <motion.div
                 initial={{ x: 50, opacity: 0 }}
