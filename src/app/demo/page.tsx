@@ -71,7 +71,7 @@ export default function DemoPage() {
 
   return (
     <div className="relative min-h-screen w-full bg-background text-foreground overflow-x-hidden">
-      {/* Background Image */}
+      {/* CORRECTED BACKGROUND SETUP */}
       {backgroundImage && (
         <Image
           src={backgroundImage.imageUrl}
@@ -81,7 +81,7 @@ export default function DemoPage() {
           data-ai-hint={backgroundImage.imageHint}
         />
       )}
-      <div className="absolute inset-0 bg-background/90 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 to-background" />
 
       {/* Header */}
       <header className="relative z-10 py-6 px-4 sm:px-8">
