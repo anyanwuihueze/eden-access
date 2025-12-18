@@ -200,10 +200,16 @@ export default function GuestPage() {
     console.log('State set: checkinCallStarted = true');
 
     try {
-      console.log('📞 Calling VAPI start() - NO VARIABLES');
+      console.log('📞 Calling VAPI start() with correct API...');
 
-      // FIXED: Just pass assistant ID, no variables
-      await vapiRef.current.start(checkinId);
+      // FIXED: Use variableValues instead of metadata
+      await vapiRef.current.start(checkinId, {
+        variableValues: {
+          accessCode: accessCode,
+          timestamp: String(Date.now()),
+          type: 'checkin'
+        }
+      });
 
       console.log('✅ Check-in call request sent');
     } catch (error: any) {
@@ -248,10 +254,16 @@ export default function GuestPage() {
     console.log('State set: checkoutCallStarted = true');
 
     try {
-      console.log('📞 Calling VAPI start() - NO VARIABLES');
+      console.log('📞 Calling VAPI start() with correct API...');
 
-      // FIXED: Just pass assistant ID, no variables
-      await vapiRef.current.start(checkoutId);
+      // FIXED: Use variableValues instead of metadata
+      await vapiRef.current.start(checkoutId, {
+        variableValues: {
+          accessCode: accessCode,
+          timestamp: String(Date.now()),
+          type: 'checkout'
+        }
+      });
 
       console.log('✅ Check-out call request sent');
     } catch (error: any) {
