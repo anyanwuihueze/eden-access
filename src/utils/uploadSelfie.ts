@@ -10,7 +10,7 @@ export async function uploadSelfie(file: File, accessCode: string) {
   
   // Upload file
   const { data: uploadData, error: uploadError } = await supabase.storage
-    .from("eden access")  // ← CHANGED
+    .from("my-selfies")  // ← CORRECT BUCKET NAME
     .upload(fileName, file, {
       contentType: "image/jpeg",
       upsert: true,
@@ -23,7 +23,7 @@ export async function uploadSelfie(file: File, accessCode: string) {
 
   // Get public URL
   const { data: urlData } = supabase.storage
-    .from("eden access")  // ← CHANGED
+    .from("my-selfies")  // ← CORRECT BUCKET NAME
     .getPublicUrl(fileName);
 
   return urlData.publicUrl;
