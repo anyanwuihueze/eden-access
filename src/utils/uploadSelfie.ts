@@ -1,8 +1,6 @@
-// src/utils/uploadSelfie.ts
 import { supabase } from "@/lib/supabaseClient";
 
 export async function uploadSelfie(file: File, accessCode: string) {
-  // Check if supabase client is initialized
   if (!supabase) {
     console.error("Supabase client not initialized");
     return null;
@@ -12,7 +10,7 @@ export async function uploadSelfie(file: File, accessCode: string) {
   
   // Upload file
   const { data: uploadData, error: uploadError } = await supabase.storage
-    .from("selfies")
+    .from("eden access")  // ← CHANGED
     .upload(fileName, file, {
       contentType: "image/jpeg",
       upsert: true,
@@ -25,7 +23,7 @@ export async function uploadSelfie(file: File, accessCode: string) {
 
   // Get public URL
   const { data: urlData } = supabase.storage
-    .from("selfies")
+    .from("eden access")  // ← CHANGED
     .getPublicUrl(fileName);
 
   return urlData.publicUrl;
