@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import SelfieCapture from './components/selfie-capture';
 import Vapi from '@vapi-ai/web';
 import { motion } from 'framer-motion';
-import { CheckCircle, Loader, ShieldCheck, PhoneCall, LogOut, PhoneOff, AlertCircle, Mic } from 'lucide-react';
+import { CheckCircle, Loader, ShieldCheck, PhoneCall, LogOut, PhoneOff, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -15,15 +15,14 @@ interface GuestVisit {
   status: 'pending' | 'pending_approval' | 'approved' | 'checked_in' | 'checked_out';
 }
 
+// Suppress non-critical console warnings
 if (typeof window !== 'undefined') {
   const originalError = console.error;
   console.error = (...args) => {
     const errorString = args.join(' ');
     if (
       errorString.includes('Ignoring settings for browser- or platform-unsupported input processor(s): audio') ||
-      errorString.includes('Generator.next') ||
-      errorString.includes('Requested device not found') ||
-      errorString.includes('microphone')
+      errorString.includes('Generator.next')
     ) {
       return;
     }
@@ -93,7 +92,6 @@ export default function GuestPage() {
           if (isMounted) {
             setCallActive(true);
             setMicError(null);
-            console.log('State updated: callActive = true');
           }
         });
 
@@ -103,7 +101,6 @@ export default function GuestPage() {
             setCallActive(false);
             setCheckinCallStarted(false);
             setCheckoutCallStarted(false);
-            console.log('State updated: callActive = false');
           }
         });
 
@@ -115,7 +112,7 @@ export default function GuestPage() {
         });
 
         vapiRef.current.on('error', (error) => {
-          console.error('❌ VAPI error details:', error);
+          console.error('❌ VAPI error:', error);
 
           if (!isMounted) return;
 
@@ -123,8 +120,22 @@ export default function GuestPage() {
           setCheckinCallStarted(false);
           setCheckoutCallStarted(false);
 
-          const errorMessage = error?.message || error?.error || String(error);
-          const errorName = error?.name || '';
+          // FIXED: Safely extract error message from Response objects
+          let errorMessage = '';
+          let errorName = '';
+
+          try {
+            if (error?.message && typeof error.message === 'string') {
+              errorMessage = error.message;
+            } else if (error?.error && typeof error.error === 'string') {
+              errorMessage = error.error;
+            } else {
+              errorMessage = String(error);
+            }
+            errorName = error?.name || '';
+          } catch (e) {
+            errorMessage = 'Unknown error occurred';
+          }
 
           if (errorName === 'NotAllowedError' || errorMessage.includes('Permission denied')) {
             setMicError('🎤 Microphone permission denied. Click the 🔒 icon in your browser address bar, allow microphone access, then refresh the page.');
@@ -133,7 +144,7 @@ export default function GuestPage() {
           } else if (errorName === 'NotReadableError' || errorMessage.includes('not readable')) {
             setMicError('🎤 Microphone is being used by another application. Close other apps and try again.');
           } else if (errorMessage.includes('unsupported input processor')) {
-            console.warn('⚠️ Audio processor warning (non-critical):', errorMessage);
+            console.warn('⚠️ Audio processor warning (non-critical)');
             return;
           } else {
             setMicError(`Call failed: ${errorMessage}. Please refresh and try again.`);
@@ -197,20 +208,31 @@ export default function GuestPage() {
     }
 
     setCheckinCallStarted(true);
-    console.log('State set: checkinCallStarted = true');
 
     try {
-      console.log('📞 Calling VAPI start() - NO VARIABLES');
-
-      // FIXED: Just pass assistant ID, no variables
+      console.log('📞 Starting VAPI call with assistant ID only');
+      
+      // FIXED: Pass only assistant ID, no variables
       await vapiRef.current.start(checkinId);
 
       console.log('✅ Check-in call request sent');
     } catch (error: any) {
       console.error('❌ Failed to start check-in call:', error);
 
-      const errorMessage = error?.message || String(error);
-      const errorName = error?.name || '';
+      // FIXED: Safely extract error message
+      let errorMessage = '';
+      let errorName = '';
+      
+      try {
+        if (error?.message && typeof error.message === 'string') {
+          errorMessage = error.message;
+        } else {
+          errorMessage = String(error);
+        }
+        errorName = error?.name || '';
+      } catch (e) {
+        errorMessage = 'Unknown error';
+      }
 
       if (errorName === 'NotAllowedError' || errorMessage.includes('Permission denied')) {
         setMicError('🎤 Microphone access denied. Click the 🔒 icon in your browser address bar to allow microphone, then try again.');
@@ -245,20 +267,31 @@ export default function GuestPage() {
     }
 
     setCheckoutCallStarted(true);
-    console.log('State set: checkoutCallStarted = true');
 
     try {
-      console.log('📞 Calling VAPI start() - NO VARIABLES');
-
-      // FIXED: Just pass assistant ID, no variables
+      console.log('📞 Starting VAPI call with assistant ID only');
+      
+      // FIXED: Pass only assistant ID, no variables
       await vapiRef.current.start(checkoutId);
 
       console.log('✅ Check-out call request sent');
     } catch (error: any) {
       console.error('❌ Failed to start check-out call:', error);
 
-      const errorMessage = error?.message || String(error);
-      const errorName = error?.name || '';
+      // FIXED: Safely extract error message
+      let errorMessage = '';
+      let errorName = '';
+      
+      try {
+        if (error?.message && typeof error.message === 'string') {
+          errorMessage = error.message;
+        } else {
+          errorMessage = String(error);
+        }
+        errorName = error?.name || '';
+      } catch (e) {
+        errorMessage = 'Unknown error';
+      }
 
       if (errorName === 'NotAllowedError' || errorMessage.includes('Permission denied')) {
         setMicError('🎤 Microphone access denied. Click the 🔒 icon in your browser address bar to allow microphone, then try again.');

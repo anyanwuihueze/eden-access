@@ -19,16 +19,14 @@ interface Props {
   onCheckoutComplete: () => void;
 }
 
-// Suppress harmless console warnings for presentation
+// Suppress harmless console warnings
 if (typeof window !== 'undefined') {
   const originalError = console.error;
   console.error = (...args) => {
     const errorString = args.join(' ');
     if (
       errorString.includes('Ignoring settings for browser- or platform-unsupported input processor(s): audio') ||
-      errorString.includes('Generator.next') ||
-      errorString.includes('Requested device not found') ||
-      errorString.includes('microphone')
+      errorString.includes('Generator.next')
     ) {
       return;
     }
@@ -78,8 +76,22 @@ export function CheckoutButton({ accessCode, guestName, guestPhone, onCheckoutCo
         console.error('Checkout call error:', error);
         setCalling(false);
         
-        const errorMessage = error?.message || error?.error || String(error);
-        const errorName = error?.name || '';
+        // FIXED: Safely extract error message from Response objects
+        let errorMessage = '';
+        let errorName = '';
+
+        try {
+          if (error?.message && typeof error.message === 'string') {
+            errorMessage = error.message;
+          } else if (error?.error && typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else {
+            errorMessage = String(error);
+          }
+          errorName = error?.name || '';
+        } catch (e) {
+          errorMessage = 'Unknown error occurred';
+        }
         
         if (errorName === 'NotAllowedError' || errorMessage.includes('Permission denied')) {
           setMicError('🎤 Microphone access denied. Click the 🔒 icon in your browser address bar, allow microphone, then try again.');
@@ -148,21 +160,27 @@ export function CheckoutButton({ accessCode, guestName, guestPhone, onCheckoutCo
     try {
       console.log('Starting feedback call...');
       
-      await vapiRef.current.start(checkoutId, {
-        metadata: { 
-          accessCode, 
-          guestName, 
-          guestPhone,
-          timestamp: Date.now()
-        },
-      });
+      // FIXED: Pass only assistant ID, no metadata
+      await vapiRef.current.start(checkoutId);
       
       console.log('Feedback call started successfully');
     } catch (error: any) {
       console.error('Failed to start feedback call:', error);
       
-      const errorMessage = error?.message || String(error);
-      const errorName = error?.name || '';
+      // FIXED: Safely extract error message
+      let errorMessage = '';
+      let errorName = '';
+      
+      try {
+        if (error?.message && typeof error.message === 'string') {
+          errorMessage = error.message;
+        } else {
+          errorMessage = String(error);
+        }
+        errorName = error?.name || '';
+      } catch (e) {
+        errorMessage = 'Unknown error';
+      }
       
       if (errorName === 'NotAllowedError' || errorMessage.includes('Permission denied')) {
         setMicError('🎤 Microphone access denied. Click the 🔒 icon in your browser address bar to allow microphone access, then try again.');
@@ -204,7 +222,6 @@ export function CheckoutButton({ accessCode, guestName, guestPhone, onCheckoutCo
             </DialogDescription>
           </DialogHeader>
           
-          {/* Microphone Error Alert */}
           {micError && (
             <Alert variant="destructive" className="text-left">
               <Mic className="h-5 w-5" />
