@@ -11,11 +11,13 @@ interface PendingApproval {
   guest_name: string;
   selfie_url: string;
   created_at: string;
+  access_code: string;
 }
 
 export default function ApprovalsPage() {
   const [approvals, setApprovals] = useState<PendingApproval[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPendingApprovals();
@@ -36,11 +38,28 @@ export default function ApprovalsPage() {
     }
   };
   
-  const handleApproval = async (id: string, decision: 'approved' | 'denied') => {
-    // This is where you would call an API to update the status
-    console.log(`Visit ${id} ${decision}`);
-    // For now, just remove it from the list
-    setApprovals(prev => prev.filter(app => app.id !== id));
+  const handleApproval = async (approval: PendingApproval, decision: 'approved' | 'denied') => {
+    setUpdatingId(approval.id);
+    
+    if (decision === 'denied') {
+      try {
+        await fetch('/api/guest-visits/deny', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: approval.id, access_code: approval.access_code }),
+        });
+      } catch (error) {
+        console.error('Error denying visit:', error);
+        // Optionally show an error toast to the user
+      }
+    } else {
+      // TODO: Implement approve logic
+      // This would call a different endpoint to set status to 'approved'
+      console.log(`Visit ${approval.id} approved`);
+    }
+
+    setApprovals(prev => prev.filter(app => app.id !== approval.id));
+    setUpdatingId(null);
   };
 
 
@@ -76,11 +95,22 @@ export default function ApprovalsPage() {
                 <p className="text-sm text-muted-foreground mt-2">{`Request received`}</p>
               </CardContent>
               <CardFooter className="grid grid-cols-2 gap-4">
-                <Button variant="outline" className="w-full" onClick={() => handleApproval(approval.id, 'denied')}>
-                  <ShieldX className="mr-2 h-4 w-4" /> Deny
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => handleApproval(approval, 'denied')}
+                  disabled={updatingId === approval.id}
+                >
+                  {updatingId === approval.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldX className="mr-2 h-4 w-4" />}
+                  Deny
                 </Button>
-                <Button className="w-full" onClick={() => handleApproval(approval.id, 'approved')}>
-                  <Check className="mr-2 h-4 w-4" /> Approve
+                <Button 
+                  className="w-full" 
+                  onClick={() => handleApproval(approval, 'approved')}
+                  disabled={updatingId === approval.id}
+                >
+                  {updatingId === approval.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                  Approve
                 </Button>
               </CardFooter>
             </Card>
