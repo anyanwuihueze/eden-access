@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, ShieldX, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useToast } from '@/hooks/use-toast';
 
 interface PendingApproval {
   id: string;
@@ -18,6 +19,7 @@ export default function ApprovalsPage() {
   const [approvals, setApprovals] = useState<PendingApproval[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchPendingApprovals();
@@ -27,12 +29,20 @@ export default function ApprovalsPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/guest-visits/pending');
+      if (!res.ok) {
+        throw new Error('Failed to fetch approvals');
+      }
       const data = await res.json();
       if (Array.isArray(data)) {
         setApprovals(data);
       }
     } catch (error) {
       console.error("Failed to fetch pending approvals:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not load pending approvals.",
+      });
     } finally {
       setLoading(false);
     }
@@ -41,27 +51,44 @@ export default function ApprovalsPage() {
   const handleApproval = async (approval: PendingApproval, decision: 'approved' | 'denied') => {
     setUpdatingId(approval.id);
     
-    if (decision === 'denied') {
-      try {
-        await fetch('/api/guest-visits/deny', {
+    try {
+      if (decision === 'denied') {
+        const res = await fetch('/api/guest-visits/deny', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: approval.id, access_code: approval.access_code }),
         });
-      } catch (error) {
-        console.error('Error denying visit:', error);
-        // Optionally show an error toast to the user
+        if (!res.ok) throw new Error('Failed to deny visit');
+
+        toast({
+          title: "Visit Denied",
+          description: `${approval.guest_name}'s request has been denied and their photo deleted.`,
+        });
+
+      } else {
+        // TODO: Implement approve logic
+        // This would call a different endpoint to set status to 'approved'
+        console.log(`Visit ${approval.id} approved`);
+         toast({
+          title: "Visit Approved",
+          description: `You have approved ${approval.guest_name}'s visit.`,
+        });
       }
-    } else {
-      // TODO: Implement approve logic
-      // This would call a different endpoint to set status to 'approved'
-      console.log(`Visit ${approval.id} approved`);
+      
+      // Optimistically remove from UI
+      setApprovals(prev => prev.filter(app => app.id !== approval.id));
+
+    } catch (error: any) {
+      console.error(`Error handling visit:`, error);
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || `Could not ${decision} the visit. Please try again.`,
+      });
+    } finally {
+      setUpdatingId(null);
     }
-
-    setApprovals(prev => prev.filter(app => app.id !== approval.id));
-    setUpdatingId(null);
   };
-
 
   if (loading) {
     return (
@@ -83,20 +110,25 @@ export default function ApprovalsPage() {
                 <CardTitle>{approval.guest_name}</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
-                {approval.selfie_url && (
-                  <Image
-                    src={approval.selfie_url}
-                    alt={`Selfie of ${approval.guest_name}`}
-                    width={400}
-                    height={400}
-                    className="rounded-lg aspect-square object-cover"
-                  />
+                {approval.selfie_url ? (
+                  <div className="relative aspect-square w-full">
+                    <Image
+                      src={approval.selfie_url}
+                      alt={`Selfie of ${approval.guest_name}`}
+                      fill
+                      className="rounded-lg object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-square w-full bg-secondary rounded-lg flex items-center justify-center">
+                    <p className="text-muted-foreground text-sm">No photo submitted</p>
+                  </div>
                 )}
-                <p className="text-sm text-muted-foreground mt-2">{`Request received`}</p>
+                <p className="text-sm text-muted-foreground mt-2">{`Request received: ${new Date(approval.created_at).toLocaleString()}`}</p>
               </CardContent>
               <CardFooter className="grid grid-cols-2 gap-4">
                 <Button 
-                  variant="outline" 
+                  variant="destructive" 
                   className="w-full" 
                   onClick={() => handleApproval(approval, 'denied')}
                   disabled={updatingId === approval.id}

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       .from('my-selfies')
       .remove([selfiePath]);
 
-    if (storageError) {
+    if (storageError && storageError.message !== 'The resource was not found') {
       // Log the error but don't block the status update if the file doesn't exist
       console.warn(`Could not delete selfie ${selfiePath}:`, storageError.message);
     }
