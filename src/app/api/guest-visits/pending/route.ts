@@ -12,7 +12,7 @@ export async function GET() {
   try {
     const { data, error } = await supabase!
       .from('guest_visits')
-      .select('id, guest_name, selfie_url, created_at')
+      .select('id, guest_name, selfie_url, created_at, access_code')
       .eq('status', 'pending_approval')
       .order('created_at', { ascending: false });
 
